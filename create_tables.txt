@@ -1,0 +1,99 @@
+CREATE TABLE person (
+  person_id INTEGER PRIMARY KEY AUTOINCREMENT,  
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL UNIQUE
+);
+
+CREATE TABLE patient (
+    person_id INTEGER PRIMARY KEY REFERENCES people(personid),
+    ins_policy INTEGER,
+    ins_name TEXT
+);
+
+CREATE TABLE doctor (
+    doctor_id INTEGER PRIMARY KEY,
+    name TEXT
+);
+
+CREATE TABLE adminstrator (
+    person_id INTEGER PRIMARY KEY 
+);
+
+CREATE TABLE technician (
+    person_id INTEGER PRIMARY KEY 
+);
+
+CREATE TABLE volunteer (
+    person_id INTEGER PRIMARY KEY 
+);
+
+CREATE TABLE nurse (
+    person_id INTEGER PRIMARY KEY 
+);
+
+
+CREATE TABLE emergency_contact (
+    contact_id INTEGER PRIMARY KEY AUTOINCREMENT,  
+    name TEXT,
+    phone_number TEXT,
+    patient_id INTEGER,
+    CONSTRAINT fk_patient_id FOREIGN KEY(patient_id) REFERENCES person(person_id)
+);
+
+
+CREATE TABLE room (
+    room_id INTEGER(20) PRIMARY KEY,
+    occupied FALSE,
+    patient_id INTEGER,
+    CONSTRAINT fk_patient_id FOREIGN KEY(patient_id) REFERENCES person(person_id)
+);
+
+CREATE TABLE admission_records (
+    admission_record_id INTEGER PRIMARY KEY,
+    date_admitted TEXT,
+    date_discharged TEXT,
+    diagnosis TEXT,
+    discharged FALSE,
+    patient_id INTEGER,
+    patient_lastname TEXT,
+    doctor_name TEXT,
+    room_number INTEGER(20),
+    CONSTRAINT fk_patient_id FOREIGN KEY(patient_id) REFERENCES person(person_id)
+);
+
+
+CREATE TABLE treatments (
+    treatment_id INTEGER PRIMARY KEY,
+    treatment_date TEXT,
+    procedure_type TEXT,
+    medication TEXT,
+    treatment_completed FALSE,
+    room_number INTEGER(20),
+    patient_id INTEGER,
+    patient_lastname TEXT,
+    doctor_name INTEGER,
+    admission_record_id INTEGER,
+    diagnosis TEXT,
+    CONSTRAINT fk_room_number FOREIGN KEY(room_number) REFERENCES room(room_id),
+    CONSTRAINT fk_patient_id FOREIGN KEY(patient_id) REFERENCES patient(person_id),
+    CONSTRAINT fk_doctor_name FOREIGN KEY(doctor_name) REFERENCES doctor(doctor_id),
+    CONSTRAINT fk_admission_record_id FOREIGN KEY(admission_record_id) REFERENCES admission_record(admission_record_id), 
+    CONSTRAINT fk_diagnosis FOREIGN KEY(diagnosis) REFERENCES admission_record(diagnosis)  
+);
+
+
+DROP TABLE patient;
+
+CREATE TABLE patient (
+   person_id INTEGER,
+   first_name TEXT,
+   last_name TEXT,
+   ins_policy INTEGER,
+   ins_name TEXT,
+   emergency_contact_id INTEGER,
+   admission_record_id INTEGER,
+   CONSTRAINT fk_emergency_contact_id FOREIGN KEY(emergency_contact_id ) REFERENCES emergency_contact(contact_id),
+   CONSTRAINT fk_admission_record_id FOREIGN KEY(admission_record_id) REFERENCES admission_records(admission_record_id),
+   CONSTRAINT fk_person_id FOREIGN KEY(person_id) REFERENCES person(person_id)
+);
+

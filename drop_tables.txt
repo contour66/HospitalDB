@@ -1,0 +1,13 @@
+
+
+DROP TABLE person; 
+DROP TABLE adminstrator;
+DROP TABLE admission_records; 
+DROP TABLE doctor; 
+DROP TABLE emergency_contact;
+DROP TABLE nurse; 
+DROP TABLE patient; 
+DROP TABLE technician; 
+DROP TABLE treatments;
+DROP TABLE volunteer; 
+DROP TABLE room;
