@@ -11,7 +11,7 @@ import java.sql.DatabaseMetaData;
 import java.io.BufferedReader;
 import java.io.Reader;
 
-
+gi
 public class Scratch {
 
    private Connection connect() {

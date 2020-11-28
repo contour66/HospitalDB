@@ -64,21 +64,11 @@ CREATE TABLE admission_records (
 
 CREATE TABLE treatments (
     treatment_id INTEGER PRIMARY KEY,
-    treatment_date TEXT,
-    procedure_type TEXT,
-    medication TEXT,
-    treatment_completed FALSE,
-    room_number INTEGER(20),
-    patient_id INTEGER,
     patient_lastname TEXT,
     doctor_name INTEGER,
-    admission_record_id INTEGER,
-    diagnosis TEXT,
-    CONSTRAINT fk_room_number FOREIGN KEY(room_number) REFERENCES room(room_id),
-    CONSTRAINT fk_patient_id FOREIGN KEY(patient_id) REFERENCES patient(person_id),
-    CONSTRAINT fk_doctor_name FOREIGN KEY(doctor_name) REFERENCES doctor(doctor_id),
-    CONSTRAINT fk_admission_record_id FOREIGN KEY(admission_record_id) REFERENCES admission_record(admission_record_id), 
-    CONSTRAINT fk_diagnosis FOREIGN KEY(diagnosis) REFERENCES admission_record(diagnosis)  
+    procedure_type TEXT,
+    treatment_date TEXT,
+    treatment TEXT  
 );
 
 

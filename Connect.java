@@ -23,9 +23,9 @@ public class Connect {
    private int treatment_id = 0;
    private Hashtable<Integer, Boolean> rooms = new Hashtable<Integer, Boolean>();
 
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
    // ******************** INTIATE DB **********************
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
 
    
    private Connection connect() {
@@ -256,7 +256,7 @@ public class Connect {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
          while (rs.next()) {
-            System.out.println(rs.getString("first_name") + " " + rs.getString("last_name")  + " id: "
+            System.out.println("\n" + rs.getString("first_name") + " " + rs.getString("last_name")  + " id: "
                   + rs.getString("person_id") + "\t");
          }
       } catch (SQLException e) {
@@ -265,9 +265,9 @@ public class Connect {
       PrintEnd("END PERSONS LIST");
    }
 
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
    // ******************** PATIENT QUERIES **********************
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
 
    public void InsertPatient(String last_name, String pol_name, String pol_num) {
       PrintStart("ADD PATIENT");
@@ -309,9 +309,9 @@ public class Connect {
       PrintEnd("END PATIENTS LIST");
    }
 
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
    // ******************** EMERGENCY CONTACT QUERIES **********************
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
 
    public void InsertEContact(String name, String phone, String plname) {
       PrintStart("ADD EMERGENCY CONTACT");
@@ -357,9 +357,9 @@ public class Connect {
       PrintEnd("END EMERGENCY CONTACTS LIST");
    }
 
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
    // ******************** ROOM QUERIES **********************
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
 
    public void InsertRoom(String plname, String room) {
       PrintStart("ADD ROOM");
@@ -526,10 +526,8 @@ public class Connect {
       return room;
    }
 
-   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    // ******************** DOCTOR QUERIES ***********************
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+   
    public void InsertDoctor(String name) {
       PrintStart("ADD DOCTOR");
       // String[] data = PersonInfo(last_name);
@@ -614,10 +612,8 @@ public class Connect {
       return id;
 
    }
-
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   
    // ******************** ADDMISSION QUERIES *******************
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
    public void InsertAdmission(String pname, String dname, String diagnosis, String date_start, String date_end, String room) {
       // String room = RoomByPatient(pname);
@@ -682,6 +678,57 @@ public class Connect {
             ResultSet rs = stmt.executeQuery(sql)) {
          // pdata = PersonInfoByID(rs.getString("person_id"));
          while (rs.next()) {
+            System.out.println("\nRecord number: " + rs.getString("admission_record_id") + "\nAdmit date: "
+                  + rs.getString("date_admitted") + "\nDischarge date: " + rs.getString("date_discharged")
+                  + "\nDiagnosis: " + rs.getString("diagnosis") + "\nDischarged: " + rs.getString("discharged")
+                  + "\nPatient id: " + rs.getString("patient_id") + "\nPatient name: "
+                  + rs.getString("patient_lastname") + "\nDoctor name: " + rs.getString("doctor_name")
+                  + "\nRoom number: " + rs.getString("room_number"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END LIST ADMIN RECORDS");
+   }
+
+   
+   // ******************** TREATMENT QUERIES ********************
+   
+   public void InsertTreatment(String pname, String dname, String date, String proc, String med) {
+      PrintStart("ADD TREATMENT RECORD");
+      treatment_id++;
+      String id = Integer.toString(treatment_id);
+      String sql = "INSERT INTO treatments(treatment_id, patient_lastname, doctor_name, procedure_type, treatment, treatment_date) VALUES(?,?,?,?,?,?);";
+      try (Connection conn = this.connect();) {
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ps.setString(1, id);
+         ps.setString(2, pname);
+         ps.setString(3, dname);
+         ps.setString(4, date);
+         ps.setString(5, proc);
+         ps.setString(6, med);
+         // ps.setString(7, "TRUE");
+         ps.executeUpdate();
+         ps.close();
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      System.out.println("Patient: " + pname 
+      + "\nDoctor: " + dname
+         + "\nProcedure: " + proc
+         + "\nTreatment: " + med
+         + "\nDate: " + date);
+      PrintEnd("END ADD TREATMENT RECORD");
+   }
+
+   public void ListTreatments() {
+      PrintStart("LIST TREAMENTS RECORDS");
+      String sql = "SELECT * FROM treatments;";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         // pdata = PersonInfoByID(rs.getString("person_id"));
+         while (rs.next()) {
             System.out.println("\n Record number: " + rs.getString("admission_record_id") + "\n Admit date: "
                   + rs.getString("date_admitted") + "\n Discharge date: " + rs.getString("date_discharged")
                   + "\n Diagnosis: " + rs.getString("diagnosis") + "\n Discharged: " + rs.getString("discharged")
@@ -695,34 +742,6 @@ public class Connect {
       PrintEnd("END LIST ADMIN RECORDS");
    }
 
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   // ******************** TREATMENT QUERIES ********************
-   // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-   public void InsertTreatment(String pname, String dname, String date, String proc, String med) {
-      PrintStart("ADD TREATMENT RECORD");
-      treatment_id++;
-
-      String id = Integer.toString(treatment_id);
-      String sql = "INSERT INTO treatments(treatment_id,  patient_lastname, doctor_name, treatment_date, procedure_type, medication, treatment_completed) VALUES(?,?,?,?,?,?, ?);";
-      try (Connection conn = this.connect();) {
-         PreparedStatement ps = conn.prepareStatement(sql);
-         ps.setString(1, id);
-         ps.setString(2, pname);
-         ps.setString(3, dname);
-         ps.setString(4, date);
-         ps.setString(5, proc);
-         ps.setString(6, med);
-         ps.setString(7, "TRUE");
-         ps.executeUpdate();
-         ps.close();
-      } catch (SQLException e) {
-         System.out.println(e.getMessage());
-      }
-      // System.out.println(proc + " ADDED with id: " + id + " EMERGENCY CONTACT FOR
-      // PATIENT ID: " + patient[0]);
-      PrintEnd("END ADD TREATMENT RECORD");
-   }
 
    // public void ListAdmissions() {
    // PrintStart("LIST ADMIN RECORDS");
