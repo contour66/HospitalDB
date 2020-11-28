@@ -12,7 +12,7 @@ import java.io.BufferedReader;
 import java.io.Reader;
 
 
-public class Connect {
+public class Scratch {
 
    private Connection connect() {
       // SQLite connection string
