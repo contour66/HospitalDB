@@ -21,16 +21,16 @@ public class DataImporter {
    private static Connect app = new Connect();
 
    public static void main(String[] args) throws FileNotFoundException {
-      // ***********************************************************
+
       // Clear DB to intialize data.
-      // ***********************************************************
+
       System.out.println("Program Intialized");
       app.DropAllTables();
       app.CreateTables();
-      // ***********************************************************
+
       // Create new Scanner objects to scan data from
       // document,lines,words.
-      // ***********************************************************
+
       System.out.println("Enter a filename to scan");
       Scanner input = new Scanner(System.in);
       String data = input.nextLine();
@@ -43,10 +43,10 @@ public class DataImporter {
       scanLineCheck.useDelimiter(",");
       int numCheck = 0;
       String checkWord = "";
-      // ***********************************************************
+
       // Scans line to check if data is treatment or patient 
       // info by counting words and stores in numcheck.
-      // ***********************************************************
+
       while (scanLineCheck.hasNext()) {
          checkWord = scanLineCheck.next();
          checkWord = checkWord.trim();
@@ -54,9 +54,9 @@ public class DataImporter {
          // System.out.println("Word count " + numCheck + ": " + checkWord);
       }
       scanLineCheck.close();
-      // ***********************************************************
+
       // Scans each line in data document.
-      // ***********************************************************
+
       while (scan.hasNextLine()) {
          String line = scan.nextLine();
          Scanner scanLine = new Scanner(line);
@@ -65,12 +65,13 @@ public class DataImporter {
          pdata = new String[12];
          tdata = new String[5];
          PatientData patient = new PatientData();
+         TreatmentData treatment = new TreatmentData();
          int count = 0;
-         // ***********************************************************
+
          // Scans each word in line and checks
          // if it should add to patient data
          // or treatment data..
-         // ***********************************************************
+
          while (scanLine.hasNext()) {
             word = scanLine.next();
             word = word.trim();
@@ -87,41 +88,38 @@ public class DataImporter {
             count++;
             // System.out.println(word);
          }
-         // ***********************************************************
+
          // Checks if discharge date is empty/null and discharge date 
          // with "Not Discharged" so patient can be added to room.
          // Populates patient data.
-         // ***********************************************************
-         if (pdata[11] == null) {
-            pdata[11] = "Not Discharged";
+
+         if (numCheck > 5) {
+            if (pdata[11] == null) {
+               pdata[11] = "Not Discharged";
+            }
             patient = patientInfo(pdata);
             PopulateDB_PatientData(patient);
             System.out.println(
-               "Patient " + patient.getFirstName() 
-               + " " + patient.getLastName() 
-               + " " + patient.getDiscDate());
-            // for (String s : tdata){
-            // System.out.println("Treatment: " + s);
+                  "Patient " + patient.getFirstName() + " " + patient.getLastName() + " " + patient.getDiscDate());
+         } else {
+            treatment = treatmentInfo(tdata);
+            PopulateDB_TreatmentData(treatment);
+            scanLine.close();
          }
-         else{
-            patient = patientInfo(pdata);
-            PopulateDB_PatientData(patient);
-            System.out.println(
-               "Patient " + patient.getFirstName() 
-               + " " + patient.getLastName() 
-               + " " + patient.getDiscDate());         
-         }
-         scanLine.close();
+
       }
       scan.close();
-      app.ListPersons();
-      app.ListRooms();
-      app.ListAdmissions();
+      System.out.println(
+         "\n************************"
+       + "\n!!!!!!!!!!!!!!!!!!!\n"
+       + "END POPULATE DB"
+       + "\n************************"
+       + "\n!!!!!!!!!!!!!!!!!!!\n");
+
    }
 
-   // ***********************************************************
-   // Method to print out/check data from patient data array.
-   // ***********************************************************
+   //*************** Method to print out/check data from patient data array. ****************
+
    private static void printLineData() {
       int count = 1;
       for (String s : pdata) {
@@ -130,9 +128,7 @@ public class DataImporter {
       }
    }
 
-   // ***********************************************************
-   // Method to intially populate DB from scanned data.
-   // ***********************************************************
+   //*************** Method to intially populate DB from scanned data. 
    private static void PopulateDB_PatientData(PatientData patient) {
       // Checks to make sure the person isn't already in the DB.
       if (!app.PersonExists(patient.getLastName()) && checkTitle(patient.getTitle())) {
@@ -156,15 +152,15 @@ public class DataImporter {
          if (patient.getDiscDate().isEmpty() || patient.getDiscDate() == null || patient.getDiscDate() == "") {
             // patient.setDiscDate("empty");
          }
-         app.InsertAdmission(patient.getLastName(), patient.getDoctor(),
-          patient.getDiagnosis(), patient.getAdmitDate(),
-          patient.getDiscDate(), patient.getRoom());
+         app.InsertAdmission(patient.getLastName(), patient.getDoctor(), patient.getDiagnosis(), patient.getAdmitDate(),
+               patient.getDiscDate(), patient.getRoom());
       }
+      app.ListPersons();
+      app.ListRooms();
+      app.ListAdmissions();
    }
 
-   // ***********************************************************
-   // Method to create a new PatientData object.
-   // ***********************************************************
+   //*************** Method to create a new PatientData object. 
    private static PatientData patientInfo(String[] data) {
       PatientData patient = new PatientData();
       patient.setTitle(data[0]);
@@ -182,9 +178,24 @@ public class DataImporter {
       return patient;
    }
 
-   // ***********************************************************
-   // Method to verify type of person based on first letter in data.
-   // ***********************************************************
+   //*************** Method to intially populate DB from scanned data. 
+   private static void PopulateDB_TreatmentData(TreatmentData treatment) {
+      app.InsertTreatment(treatment.getLastName(), treatment.getDoctor(), treatment.getType(), treatment.getTreatment(),
+            treatment.getDate());
+   }
+
+   //*************** Method to create a new TreatmentData object. 
+   private static TreatmentData treatmentInfo(String[] data) {
+      TreatmentData treatment = new TreatmentData();
+      treatment.setLastName(data[0]);
+      treatment.setDoctor(data[1]);
+      treatment.setType(data[2]);
+      treatment.setTreatment(data[3]);
+      treatment.setDate(data[4]);
+      return treatment;
+   }
+
+   //*************** Method to verify type of person based on first letter in data.
    private static boolean checkTitle(String t) {
       t = t.toUpperCase();
       for (int i = 0; i < titles.length; i++) {
