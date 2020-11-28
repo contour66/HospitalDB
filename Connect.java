@@ -484,37 +484,6 @@ public class Connect {
    }
 
 
-
-
-   // public boolean CheckMaxRooms() {
-   //    if (room_num >= 20) {
-   //       System.out.println("CANNOT ADD PATIENT TO ROOM \nMAX NUMBER OF ROOMS REACHED");
-   //       return true;
-   //    }
-   //    return false;
-   // }
-
-   public boolean RoomMaxOut() {
-      String sql = "SELECT MAX(room_id) FROM room;";
-      int room = 0;
-      try (Connection conn = this.connect();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
-         while (rs.next()) {
-            System.out.println(rs.getString("room_id") + "\t" + rs.getString("last_name") + "\t" + " id: "
-                  + rs.getString("person_id") + "\t");
-                  room = Integer.parseInt(rs.getString("room_id"));
-                
-         }
-      } catch (SQLException e) {
-         System.out.println(e.getMessage());
-      }
-      if(room >= 20){
-         return true;
-      }
-      return false;
-   }
-
    private Hashtable intiateRooms(){
       PrintStart("INTIATE ROOMS");
       int count = 1;
@@ -530,21 +499,6 @@ public class Connect {
       return rooms;
    }
 
-   // public checkRooms(){
-   //    PrintStart("CHECK ROOMS");
-   //    int count = 1;
-   //    while(count <= 20 ){
-   //       rooms.put(count, false);
-   //       count++;
-   //    }
-   //    Set<Integer> keys = rooms.keySet();
-   //    for(Integer v: keys){
-   //       System.out.println("ROOM: "  + v + " OCCUPIED? " + rooms.get(v));
-   //    }
-   //    PrintStart("END INTIATE ROOMS");
-   //    return rooms;
-   // }
-
    private void updateRoomTableTrue(Integer room){
       rooms.replace(room, false, true);
    }
@@ -552,9 +506,6 @@ public class Connect {
    private void updateRoomTableFalse(Integer room){
       rooms.replace(room, false, true);
    }
-
-
-
 
    public String RoomByPatient(String last_name) {
       PrintStart("GET ROOM PATIENT");
