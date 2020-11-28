@@ -97,15 +97,26 @@ public class DataImporter {
             patient = patientInfo(pdata);
             PopulateDB_PatientData(patient);
             System.out.println(
-                  "Patient " + patient.getFirstName() + " " + patient.getLastName() + " " + patient.getDiscDate());
+               "Patient " + patient.getFirstName() 
+               + " " + patient.getLastName() 
+               + " " + patient.getDiscDate());
             // for (String s : tdata){
             // System.out.println("Treatment: " + s);
+         }
+         else{
+            patient = patientInfo(pdata);
+            PopulateDB_PatientData(patient);
+            System.out.println(
+               "Patient " + patient.getFirstName() 
+               + " " + patient.getLastName() 
+               + " " + patient.getDiscDate());         
          }
          scanLine.close();
       }
       scan.close();
       app.ListPersons();
       app.ListRooms();
+      app.ListAdmissions();
    }
 
    // ***********************************************************
@@ -145,11 +156,10 @@ public class DataImporter {
          if (patient.getDiscDate().isEmpty() || patient.getDiscDate() == null || patient.getDiscDate() == "") {
             // patient.setDiscDate("empty");
          }
-         // app.InsertAdmission(patient.getLastName(), patient.getDoctor(),
-         // patient.getDiagnosis(), patient.getAdmitDate(),
-         // patient.getDiscDate(), patient.getRoom());
+         app.InsertAdmission(patient.getLastName(), patient.getDoctor(),
+          patient.getDiagnosis(), patient.getAdmitDate(),
+          patient.getDiscDate(), patient.getRoom());
       }
-      // app.InsertRoom(patient.getLastName(), patient.getRoom());
    }
 
    // ***********************************************************
