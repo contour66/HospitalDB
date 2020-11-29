@@ -45,6 +45,7 @@ CREATE TABLE room (
     room_id INTEGER(20) PRIMARY KEY,
     occupied FALSE,
     patient_id INTEGER,
+    patient_lastname TEXT,
     CONSTRAINT fk_patient_id FOREIGN KEY(patient_id) REFERENCES person(person_id)
 );
 
