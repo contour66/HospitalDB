@@ -12,22 +12,15 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
 import java.util.Set;
 
-import javax.crypto.interfaces.PBEKey;
-
 public class Connect {
    private int pid = 0;
-   private int contact_id = 100;
-   private int room_num = 0;
+   private int contact_id = 1000;
    private int admission_id = 0;
-   private int doctor_id = 0;
+   private int doctor_id = 100;
    private int treatment_id = 0;
    private Hashtable<Integer, Boolean> rooms = new Hashtable<Integer, Boolean>();
 
-   
    // ******************** INTIATE DB **********************
-   
-
-   
    private Connection connect() {
       // SQLite connection string
       String url = "jdbc:sqlite:Hospital.sl3";
@@ -117,8 +110,6 @@ public class Connect {
 
       contact_id = 100;
 
-      room_num = 0;
-
       admission_id = 0;
    }
 
@@ -155,9 +146,7 @@ public class Connect {
       PrintEnd("END " + table + " COLUMN LIST");
    }
 
-   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-   // ******************** PERSON QUERIES **********************
-   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   // ******************** POPULATE PERSON QUERIES **********************
    public void InsertPerson(String first_name, String last_name) {
       PrintStart("ADD PERSON");
       pid++;
@@ -208,8 +197,8 @@ public class Connect {
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
-         System.out.println(rs.getString("first_name") + " " + rs.getString("last_name") +  " id: "
-               + rs.getString("person_id"));
+         System.out.println(
+               rs.getString("first_name") + " " + rs.getString("last_name") + " id: " + rs.getString("person_id"));
          id = rs.getString("person_id");
          data[0] = id;
          first = rs.getString("first_name");
@@ -256,7 +245,7 @@ public class Connect {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
          while (rs.next()) {
-            System.out.println("\n" + rs.getString("first_name") + " " + rs.getString("last_name")  + " id: "
+            System.out.println("\n" + rs.getString("first_name") + " " + rs.getString("last_name") + " id: "
                   + rs.getString("person_id") + "\t");
          }
       } catch (SQLException e) {
@@ -265,9 +254,7 @@ public class Connect {
       PrintEnd("END PERSONS LIST");
    }
 
-   
-   // ******************** PATIENT QUERIES **********************
-   
+   // ******************** POPULATE PATIENT QUERIES **********************
 
    public void InsertPatient(String last_name, String pol_name, String pol_num) {
       PrintStart("ADD PATIENT");
@@ -277,7 +264,7 @@ public class Connect {
       try (Connection conn = this.connect();) {
          PreparedStatement ps = conn.prepareStatement(sql);
          // System.out.pring
-         
+
          ps.setInt(1, id);
          ps.setString(2, data[1]);
          ps.setString(3, data[2]);
@@ -309,9 +296,7 @@ public class Connect {
       PrintEnd("END PATIENTS LIST");
    }
 
-   
-   // ******************** EMERGENCY CONTACT QUERIES **********************
-   
+   // ******************** POPULATE EMERGENCY CONTACT QUERIES **********************
 
    public void InsertEContact(String name, String phone, String plname) {
       PrintStart("ADD EMERGENCY CONTACT");
@@ -357,55 +342,76 @@ public class Connect {
       PrintEnd("END EMERGENCY CONTACTS LIST");
    }
 
-   
-   // ******************** ROOM QUERIES **********************
-   
+   // ******************** POPULATE ROOM QUERIES **********************
+
+   // public void SetAllRooms(String plname, String room) {
+   //    PrintStart("SETTING ROOMS");
+   //    String[] patient = PersonInfo(plname);
+   //    // String id = Integer.toString(room);
+   //    boolean roomCheck = CheckOccupiedRoom(room);
+   //    String sql = "INSERT INTO room(room_id, occupied, patient_id, patient_lastname) VALUES(?,?,?,?);";     
+   //       try (Connection conn = this.connect();) {
+   //          PreparedStatement ps = conn.prepareStatement(sql);
+   //             ps.setString(1, room);
+   //             ps.setString(2, "TRUE");
+   //             ps.setString(3, patient[0]);
+   //             ps.setString(4, plname);
+   //             ps.executeUpdate();
+   //             ps.close();
+   //             System.out.println("Room number: " + room 
+   //             + "\nOCCUPIED by PATIENT: " + plname
+   //             + "\nPatient id: " + patient[1] 
+   //             + " " + patient[2]);
+   //       } catch (SQLException e) {
+   //             System.out.println(e.getMessage());
+   //       }
+
+   //    }
+   //    else{
+   //       System.out.println("Room Number: " + room + " is occupied");
+   //    }
+   //    PrintEnd("END SETTING ROOMS");
+   // }
 
    public void InsertRoom(String plname, String room) {
       PrintStart("ADD ROOM");
       String[] patient = PersonInfo(plname);
       // String id = Integer.toString(room);
       boolean roomCheck = CheckOccupiedRoom(room);
-      String sql = "INSERT INTO room(room_id, occupied, patient_id) VALUES(?,?,?);";
+      String sql = "INSERT INTO room(room_id, occupied, patient_id, patient_lastname) VALUES(?,?,?,?);";
       if (Integer.valueOf(room) > 20) {
          System.out.println("Invalid Room Number: " + room);
-      }
-      else if(roomCheck == false){
+      } else if (roomCheck == false) {
          try (Connection conn = this.connect();) {
             PreparedStatement ps = conn.prepareStatement(sql);
-               ps.setString(1, room);
-               ps.setString(2, "TRUE");
-               ps.setString(3, patient[0]);
-               ps.executeUpdate();
-               ps.close();
-               System.out.println("Room number: " + room 
-               + " OCCUPIED by PATIENT: " + patient[1] 
-               + " " + patient[2]);
+            ps.setString(1, room);
+            ps.setString(2, "TRUE");
+            ps.setString(3, patient[0]);
+            ps.setString(4, plname);
+            ps.executeUpdate();
+            ps.close();
+            System.out.println("Room number: " + room + "\nOCCUPIED by PATIENT: " + plname + "\nPatient id: "
+                  + patient[1] + " " + patient[2]);
          } catch (SQLException e) {
-               System.out.println(e.getMessage());
+            System.out.println(e.getMessage());
          }
 
-      }
-      else{
+      } else {
          System.out.println("Room Number: " + room + " is occupied");
       }
       PrintEnd("END ADD ROOM");
    }
 
-
    public void ListRooms() {
       PrintStart("LIST ROOMS");
-      String sql = "SELECT room_id, patient_id, occupied FROM room;";
+      String sql = "SELECT room_id, patient_id, occupied, patient_lastname FROM room;";
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
-        
          while (rs.next()) {
-            System.out.println("\n Patient with id: " 
-            + rs.getString("patient_id") + " in room: "
-                  + rs.getString("room_id") 
-                  + "\n Room is occupied? "  
-                  + rs.getString("occupied"));
+            System.out
+                  .println("\nPatient " + rs.getString("patient_lastname") + " with id: " + rs.getString("patient_id")
+                        + " in room: " + rs.getString("room_id") + "\n Room is occupied? " + rs.getString("occupied"));
          }
       } catch (SQLException e) {
          System.out.println(e.getMessage());
@@ -413,31 +419,7 @@ public class Connect {
       PrintEnd("END EMERGENCY CONTACTS LIST");
    }
 
-   public boolean CheckOccupiedRoom( String room) {
-      String sql = "SELECT * FROM room WHERE room_id like '" + room + "';";
-      boolean occupied = false;
-      PrintStart("CHECK FOR OCCUPIED ROOM");
-      try (Connection conn = this.connect();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
-         while (rs.next()) {        
-            if(rs.getInt("occupied") == 1){
-               occupied = true;
-               System.out.println("Room number " + room + " IS occupied");  
-            }   
-            else{
-               System.out.println("Room number " + room + " IS NOT occupied");  
-            } 
-         }
-      } catch (SQLException e) {
-         System.out.println(e.getMessage());
-      }
-      PrintEnd("END CHECK FOR OCCUPIED ROOM");
-      return occupied;
-      
-   }
-
-   public boolean CheckRoom( String room) {
+   public boolean CheckOccupiedRoom(String room) {
       String sql = "SELECT * FROM room WHERE room_id like '" + room + "';";
       boolean occupied = false;
       PrintStart("CHECK FOR OCCUPIED ROOM");
@@ -445,65 +427,41 @@ public class Connect {
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
          while (rs.next()) {
-            System.out.println(rs.getString("room_id") + "\t" + " is occupied?" + rs.getString("occupied"));  
-            if(rs.getString("occupied") == "true"){
+            if (rs.getInt("occupied") == 1) {
                occupied = true;
-            }     
+               System.out.println("Room number " + room + " IS occupied");
+            } else {
+               System.out.println("Room number " + room + " IS NOT occupied");
+            }
          }
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
       PrintEnd("END CHECK FOR OCCUPIED ROOM");
       return occupied;
-      
+
    }
 
-   public boolean CheckRooms() {
-      String sql = "SELECT COUNT(*) AS total FROM room WHERE occupied;";
-      boolean occupied = false;
-      int total = 0;
-      PrintStart("CHECK FOR OCCUPIED ROOM");
-      try (Connection conn = this.connect();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
-         while (rs.next()) {
-            System.out.println(rs.getInt("total") + " rooms are occupied");  
-           total = rs.getInt("total");
-         }
-      } catch (SQLException e) {
-         System.out.println(e.getMessage());
-      }
-      if(total == 20){
-         occupied = true;
-         System.out.println("All rooms occupied");
-         return occupied;
-      }
-      PrintEnd("END CHECK FOR OCCUPIED ROOM");
-      return occupied;
-      
-   }
-
-
-   private Hashtable intiateRooms(){
+   private Hashtable intiateRooms() {
       PrintStart("INTIATE ROOMS");
       int count = 1;
-      while(count <= 20 ){
+      while (count <= 20) {
          rooms.put(count, false);
          count++;
       }
       Set<Integer> keys = rooms.keySet();
-      for(Integer v: keys){
-         System.out.println("ROOM: "  + v + " OCCUPIED? " + rooms.get(v));
+      for (Integer v : keys) {
+         System.out.println("ROOM: " + v + " OCCUPIED? " + rooms.get(v));
       }
       PrintStart("END INTIATE ROOMS");
       return rooms;
    }
 
-   private void updateRoomTableTrue(Integer room){
+   private void updateRoomTableTrue(Integer room) {
       rooms.replace(room, false, true);
    }
 
-   private void updateRoomTableFalse(Integer room){
+   private void updateRoomTableFalse(Integer room) {
       rooms.replace(room, false, true);
    }
 
@@ -526,8 +484,8 @@ public class Connect {
       return room;
    }
 
-   // ******************** DOCTOR QUERIES ***********************
-   
+   // ******************** POPULATE DOCTOR QUERIES ***********************
+
    public void InsertDoctor(String name) {
       PrintStart("ADD DOCTOR");
       // String[] data = PersonInfo(last_name);
@@ -612,10 +570,11 @@ public class Connect {
       return id;
 
    }
-   
-   // ******************** ADDMISSION QUERIES *******************
 
-   public void InsertAdmission(String pname, String dname, String diagnosis, String date_start, String date_end, String room) {
+   // ******************** POPULATE ADDMISSION QUERIES *******************
+
+   public void InsertAdmission(String pname, String dname, String diagnosis, String date_start, String date_end,
+         String room) {
       // String room = RoomByPatient(pname);
       PrintStart("ADD ADMISSION RECORD");
       String[] patient = PersonInfo(pname);
@@ -691,9 +650,8 @@ public class Connect {
       PrintEnd("END LIST ADMIN RECORDS");
    }
 
-   
-   // ******************** TREATMENT QUERIES ********************
-   
+   // ******************** POPULATE TREATMENT QUERIES ********************
+
    public void InsertTreatment(String pname, String dname, String date, String proc, String med) {
       PrintStart("ADD TREATMENT RECORD");
       treatment_id++;
@@ -713,11 +671,8 @@ public class Connect {
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
-      System.out.println("Patient: " + pname 
-      + "\nDoctor: " + dname
-         + "\nProcedure: " + proc
-         + "\nTreatment: " + med
-         + "\nDate: " + date);
+      System.out.println("Patient: " + pname + "\nDoctor: " + dname + "\nProcedure: " + proc + "\nTreatment: " + med
+            + "\nDate: " + date);
       PrintEnd("END ADD TREATMENT RECORD");
    }
 
@@ -742,31 +697,281 @@ public class Connect {
       PrintEnd("END LIST ADMIN RECORDS");
    }
 
+   //! ====================================================================
+   //? ********************************************************************
+   //? ############### QUERY SELECTION METHODS FOR MENU ###################
+   //? ********************************************************************
+   //! ====================================================================
 
-   // public void ListAdmissions() {
-   // PrintStart("LIST ADMIN RECORDS");
-   // String sql = "SELECT * FROM admission_records;";
-   // try (Connection conn = this.connect();
-   // Statement stmt = conn.createStatement();
-   // ResultSet rs = stmt.executeQuery(sql)) {
-   // //pdata = PersonInfoByID(rs.getString("person_id"));
-   // while (rs.next()) {
-   // System.out.println(
-   // "\n Record number: " + rs.getString("admission_record_id")
-   // + "\n Admit date: " + rs.getString("date_admitted")
-   // + "\n Discharge date: " + rs.getString("date_discharged")
-   // + "\n Diagnosis: " + rs.getString("diagnosis")
-   // + "\n Discharged: " + rs.getString("discharged")
-   // + "\n Patient id: " + rs.getString("patient_id")
-   // + "\n Patient name: " + rs.getString("patient_lastname")
-   // + "\n Doctor name: " + rs.getString("doctor_name")
-   // + "\n Room number: " + rs.getString("room_number"));
+   //*** 1.1) List the rooms that are occupied, along with the associated
+   //*** patient names and the date the patient was admitted. 
+   public void Query_1_1() {
+      PrintStart("Query_1_1");
+      //String rooms = "SELECT room_id, patient_lastname FROM room;";
+      String admit = "SELECT room.room_id, room.occupied, admission_records.patient_lastname, admission_records.date_admitted"
+            + " FROM admission_records INNER JOIN room ON room.patient_lastname = admission_records.patient_lastname";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(admit)) {
+         while (rs.next()) {
+            System.out.println("\nPatient: " + rs.getString("patient_lastname") + "\nDate admitted: "
+                  + rs.getString("date_admitted") + "\nRoom number: " + rs.getString("room_id"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_1_1");
+
+   }
+
+   //*** 1.2) List the rooms that are currently unoccupied.
+   public void Query_1_2() {
+   }
+   //    String sql = "SELECT * FROM room;";   
+
+   //    PrintStart("LIST UNOCCUPIED ROOM");
+   //       try (Connection conn = this.connect();
+   //          Statement stmt = conn.createStatement();
+   //          ResultSet rs = stmt.executeQuery(roomTable.get(j))) {
+   //           while (rs.next()) {   
+   //             // System.out.println("ROOM NOT EXISTS " + Integer.valueOf(rs.getString("room_id")));
+   //            boolean empty = false;
+   //            int room = Integer.valueOf(rs.getString("room_id"));
+   //             if(rs.getInt("occupied") == 0){
+   //                empty = true;
+   //             }
+   //             roomOccupied(room, empty);
+   //          }
+   //       } catch (SQLException e) {
+   //       System.out.println(e.getMessage());
    // }
-   // } catch (SQLException e) {
-   // System.out.println(e.getMessage());
+   //    PrintEnd("END LIST UNOCCUPIED");
    // }
-   // PrintEnd("END LIST ADMIN RECORDS");
+
    // }
+
+   // public void Query_1_2() {
+   // int count = 0; 
+   // String[] roomsearch = RoomArrayHelper();
+   // boolean[] occupied = new boolean[20];
+   // Hashtable<Integer, String> roomTable = new Hashtable<Integer,String>();
+   // //Hashtable<Integer, Integer> roomOccupied = new Hashtable<Integer,Integer>();
+   // Hashtable<Integer, Boolean> roomOccupied = new Hashtable<Integer,Boolean>();
+   // String sql = "SELECT * FROM room WHERE occupied like 'TRUE';";   
+   //    PrintStart("LIST UNOCCUPIED ROOM");
+
+   //       try (Connection conn = this.connect();
+   //          Statement stmt = conn.createStatement();
+   //          ResultSet rs = stmt.executeQuery(roomTable.get(j))) {
+   //           while (rs.next()) {   
+   //             // System.out.println("ROOM NOT EXISTS " + Integer.valueOf(rs.getString("room_id")));
+   //            boolean empty = false;
+   //            int room = Integer.valueOf(rs.getString("room_id"));
+   //             if(rs.getInt("occupied") == 0){
+   //                empty = true;
+   //             }
+   //             roomOccupied(room, empty);
+   //          }
+   //       } catch (SQLException e) {
+   //       System.out.println(e.getMessage());
+   // }
+   //    PrintEnd("END LIST UNOCCUPIED");
+   // }
+
+   //***  1.3) List all rooms in the hospital along with patient names and admission dates for 
+   //*** those that are occupied.
+   public void Query_1_3() {
+      PrintStart("Query_1_3");
+      //String rooms = "SELECT room_id, patient_lastname FROM room;";
+      String sql = "SELECT room.room_id, room.occupied, admission_records.patient_lastname, admission_records.date_admitted"
+            + " FROM admission_records INNER JOIN room ON room.patient_lastname = admission_records.patient_lastname";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("\nPatient: " + rs.getString("patient_lastname") + "\nDate admitted: "
+                  + rs.getString("date_admitted") + "\nRoom number: " + rs.getString("room_id"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_1_3");
+   }
+
+   //*** Room Helper 
+   private String[] RoomArrayHelper() {
+      String[] rooms = new String[20];
+      for (int i = 1; i < rooms.length; i++) {
+         rooms[i] = Integer.toString(i);
+      }
+      return rooms;
+   }
+
+   //*** 2.1) List all patients in the database, with full personal information.
+   public void Query_2_1() {
+      PrintStart("Query_2_1");
+      String sql = "SELECT person_id, first_name, last_name, ins_name, ins_policy FROM patient;";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("\n" + rs.getString("first_name") + " " + rs.getString("last_name") + " " + " id: "
+                  + rs.getString("person_id") + "\n" + "Insurance: " + rs.getString("ins_name") + "\nPolicy number: "
+                  + rs.getString("ins_policy"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_2_1");
+   }
+
+   //*** 2.2) List all patients currently admitted to the hospital. List only patient 
+   //*** identification number and name.
+   public void Query_2_2() {
+      PrintStart("Query_2_2");
+      // String sql = "SELECT * FROM admission_records WHERE date_discharged='Not Discharged';";
+      String sql = "SELECT patient.person_id, patient.first_name, patient.last_name, admission_records.date_discharged"
+            + " FROM admission_records INNER JOIN patient ON patient.last_name = admission_records.patient_lastname WHERE admission_records.date_discharged='Not Discharged';";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("\nPatient: " + rs.getString("first_name") + " " + rs.getString("last_name") + "\nId: "
+                  + rs.getString("person_id"));
+            // + "\nDischarged status: " + rs.getString("date_discharged"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_2_2");
+
+   }
+
+   //*** 2.3) List all patients who were discharged in a given date range. List only 
+   //*** patient identification number and name.
+   public void Query_2_3() {
+   }
+
+   //*** 2.4) List all patients who have been admitted within a given date range. 
+   //*** List only patient identification number and name.
+   public void Query_2_4() {
+   }
+
+   //*** 2.5) For a given patient, list all admissions to the hospital along with 
+   //*** the diagnosis for each admission.
+   public void Query_2_5() {
+         String last_name = Helper_2_5();
+         PrintStart("Query_2_5");
+         String sql = "SELECT * FROM admission_records WHERE patient_lastname like '" + last_name + "';";
+         System.out.println("\nAddmission Records for: " + last_name);
+         try (Connection conn = this.connect();
+               Statement stmt = conn.createStatement();
+               ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+               System.out.println(
+                  "\nAdmission number:" + rs.getString("admission_record_id") 
+                  + "\nDate admitted: " + rs.getString("date_admitted") 
+                  + "\nDate discharged: "  + rs.getString("date_discharged")
+                  + "\nDiagnosis: "   +rs.getString("diagnosis"));
+            }
+         } catch (SQLException e) {
+            System.out.println(e.getMessage());
+         }
+         PrintEnd("END Query_2_5");
+   }
+
+   //? Helper for 2.5 to get user input to search patient records.
+   private static String Helper_2_5(){
+      System.out.println("Enter the patients last name: ");
+      Scanner input = new Scanner(System.in);
+      String data = input.nextLine();
+      return data;
+   }
+
+   //*** 2.6) For a given patient, list all treatments that were administered. 
+   //*** Group treatments by admissions. List admissions in descending chronological order, 
+   //*** and list treatments in ascending chronological order within each admission.
+   public void Query_2_6() {
+   }
+
+   //*** 2.7) List patients who were admitted to the hospital within 30 days of their 
+   //*** last discharge date. For each patient list their patient identification number, 
+   //*** name, diagnosis, and admitting doctor.
+   public void Query_2_7() {
+   }
+
+   //*** 2.8) For each patient that has ever been admitted to the hospital, list their 
+   //*** total number of admissions, average duration of each admission, longest 
+   //*** span between admissions, shortest span between admissions, and average span 
+   //*** between admissions.
+   public void Query_2_8() {
+   }
+
+   //*** 3.1) List the diagnoses given to admitted patients, in descending order of 
+   //*** occurrences. List diagnosis identification number, name, and total occurrences of 
+   //*** each diagnosis.
+   public void Query_3_1() {
+   }
+
+   //*** 3.2) List the diagnoses given to all (admitted and discharged) patients, in descending 
+   //*** order of occurrences. List diagnosis identification number, name, and total occurrences 
+   //*** of each diagnosis.
+
+   public void Query_3_2() {
+   }
+
+   //*** 3.3) List the treatments performed at the hospital, in descending order of occurrences. 
+   //*** List treatment identification number, name, and total number of occurrences of each treatment.
+   public void Query_3_3() {
+   }
+
+   //*** 3.4) List the treatments performed on admitted patients, in descending order of occurrences. 
+   //*** List treatment identification number, name, and total number of occurrences of each treatment.
+   public void Query_3_4() {
+   }
+
+   //*** 3.5) List the top 5 most administered medications.
+   public void Query_3_5() {
+   }
+
+   //*** 3.6) List the most common procedure administered at the hospital. Also, list all doctors that 
+   //*** performed that procedure.
+   public void Query_3_6() {
+   }
+
+   //*** 3.7) List the most recent procedure administered at the hospital. Also, list all doctors that 
+   //*** performed that procedure.
+   public void Query_3_7() {
+   }
+
+   //*** 3.8) List the diagnoses associated with the top 5 patients who have the highest occurrences of 
+   //*** admissions to the hospital, in ascending order or correlation.
+   public void Query_3_8() {
+   }
+
+   //*** 4.1) List all workers at the hospital, in ascending last name, first name order. For each worker, 
+   //*** list their, name, and job category.
+   public void Query_4_1() {
+   }
+
+   //*** 4.2) List the primary doctors of patients with a high admission rate (at least 4 admissions within 
+   //*** a one-year time frame).
+   public void Query_4_2() {
+   }
+
+   //*** 4.3) For a given doctor, list all associated diagnoses in descending order of occurrence. For each
+   //*** diagnosis, list the total number of occurrences for the given doctor.
+   public void Query_4_3() {
+   }
+
+   //*** 4.4) For a given doctor, list all treatments that they ordered in descending order of occurrence. 
+   //*** For each treatment, list the total number of occurrences for the given doctor.
+   public void Query_4_4() {
+   }
+
+   //*** 4.5) List doctors who have been involved in the treatment of every admitted patient.
+   public void Query_4_5() {
+   }
 
    public static void main(String[] args) throws FileNotFoundException {
       // Connect app = new Connect();
@@ -783,3 +988,74 @@ public class Connect {
       // app.ListTables();
    }
 }
+
+// public void ListAdmissions() {
+// PrintStart("LIST ADMIN RECORDS");
+// String sql = "SELECT * FROM admission_records;";
+// try (Connection conn = this.connect();
+// Statement stmt = conn.createStatement();
+// ResultSet rs = stmt.executeQuery(sql)) {
+// //pdata = PersonInfoByID(rs.getString("person_id"));
+// while (rs.next()) {
+// System.out.println(
+// "\n Record number: " + rs.getString("admission_record_id")
+// + "\n Admit date: " + rs.getString("date_admitted")
+// + "\n Discharge date: " + rs.getString("date_discharged")
+// + "\n Diagnosis: " + rs.getString("diagnosis")
+// + "\n Discharged: " + rs.getString("discharged")
+// + "\n Patient id: " + rs.getString("patient_id")
+// + "\n Patient name: " + rs.getString("patient_lastname")
+// + "\n Doctor name: " + rs.getString("doctor_name")
+// + "\n Room number: " + rs.getString("room_number"));
+// }
+// } catch (SQLException e) {
+// System.out.println(e.getMessage());
+// }
+// PrintEnd("END LIST ADMIN RECORDS");
+// }
+
+// public boolean CheckRoom( String room) {
+//    String sql = "SELECT * FROM room WHERE room_id like '" + room + "';";
+//    boolean occupied = false;
+//    PrintStart("CHECK FOR OCCUPIED ROOM");
+//    try (Connection conn = this.connect();
+//          Statement stmt = conn.createStatement();
+//          ResultSet rs = stmt.executeQuery(sql)) {
+//       while (rs.next()) {
+//          System.out.println(rs.getString("room_id") + "\t" + " is occupied?" + rs.getString("occupied"));  
+//          if(rs.getString("occupied") == "true"){
+//             occupied = true;
+//          }     
+//       }
+//    } catch (SQLException e) {
+//       System.out.println(e.getMessage());
+//    }
+//    PrintEnd("END CHECK FOR OCCUPIED ROOM");
+//    return occupied;
+
+// }
+
+// public boolean CheckRooms() {
+//    String sql = "SELECT COUNT(*) AS total FROM room WHERE occupied;";
+//    boolean occupied = false;
+//    int total = 0;
+//    PrintStart("CHECK FOR OCCUPIED ROOM");
+//    try (Connection conn = this.connect();
+//          Statement stmt = conn.createStatement();
+//          ResultSet rs = stmt.executeQuery(sql)) {
+//       while (rs.next()) {
+//          System.out.println(rs.getInt("total") + " rooms are occupied");  
+//         total = rs.getInt("total");
+//       }
+//    } catch (SQLException e) {
+//       System.out.println(e.getMessage());
+//    }
+//    if(total == 20){
+//       occupied = true;
+//       System.out.println("All rooms occupied");
+//       return occupied;
+//    }
+//    PrintEnd("END CHECK FOR OCCUPIED ROOM");
+//    return occupied;
+
+// }
