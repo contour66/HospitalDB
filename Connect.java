@@ -11,6 +11,9 @@ import java.io.FileNotFoundException;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
 import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Connect {
    private int pid = 0;
@@ -150,11 +153,11 @@ public class Connect {
    public void InsertPerson(String first_name, String last_name) {
       PrintStart("ADD PERSON");
       pid++;
-      String id = Integer.toString(pid);
+      // String id = Integer.toString(pid);
       String sql = "INSERT INTO person(person_id, first_name, last_name) VALUES(?,?,?);";
       try (Connection conn = this.connect();) {
          PreparedStatement ps = conn.prepareStatement(sql);
-         ps.setString(1, id); // First ? in sql
+         ps.setInt(1, pid); // First ? in sql
          ps.setString(2, first_name); // Second ? in sql
          ps.setString(3, last_name); // Fourth ? in sql
          ps.executeUpdate();
@@ -162,7 +165,7 @@ public class Connect {
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
-      System.out.println(first_name + " " + last_name + " ADDED with id: " + id);
+      System.out.println(first_name + " " + last_name + " ADDED with id: " + pid);
       PrintEnd("ADDED PERSON");
    }
 
@@ -344,35 +347,6 @@ public class Connect {
 
    // ******************** POPULATE ROOM QUERIES **********************
 
-   // public void SetAllRooms(String plname, String room) {
-   //    PrintStart("SETTING ROOMS");
-   //    String[] patient = PersonInfo(plname);
-   //    // String id = Integer.toString(room);
-   //    boolean roomCheck = CheckOccupiedRoom(room);
-   //    String sql = "INSERT INTO room(room_id, occupied, patient_id, patient_lastname) VALUES(?,?,?,?);";     
-   //       try (Connection conn = this.connect();) {
-   //          PreparedStatement ps = conn.prepareStatement(sql);
-   //             ps.setString(1, room);
-   //             ps.setString(2, "TRUE");
-   //             ps.setString(3, patient[0]);
-   //             ps.setString(4, plname);
-   //             ps.executeUpdate();
-   //             ps.close();
-   //             System.out.println("Room number: " + room 
-   //             + "\nOCCUPIED by PATIENT: " + plname
-   //             + "\nPatient id: " + patient[1] 
-   //             + " " + patient[2]);
-   //       } catch (SQLException e) {
-   //             System.out.println(e.getMessage());
-   //       }
-
-   //    }
-   //    else{
-   //       System.out.println("Room Number: " + room + " is occupied");
-   //    }
-   //    PrintEnd("END SETTING ROOMS");
-   // }
-
    public void InsertRoom(String plname, String room) {
       PrintStart("ADD ROOM");
       String[] patient = PersonInfo(plname);
@@ -491,19 +465,19 @@ public class Connect {
       // String[] data = PersonInfo(last_name);
       // String[] patient = PersonInfo(plname);
       doctor_id++;
-      String id = Integer.toString(doctor_id);
+      // String id = Integer.toString(doctor_id);
 
       String sql = "INSERT INTO doctor(doctor_id, name) VALUES(?,?);";
       try (Connection conn = this.connect();) {
          PreparedStatement ps = conn.prepareStatement(sql);
-         ps.setString(1, id);
+         ps.setInt(1, doctor_id);
          ps.setString(2, name);
          ps.executeUpdate();
          ps.close();
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
-      System.out.println("Doctor " + name + " ADDED with id: " + id);
+      System.out.println("Doctor " + name + " ADDED with id: " + doctor_id);
       PrintEnd("ADDED DOCTOR");
    }
 
@@ -581,11 +555,11 @@ public class Connect {
       // String doc_id = GetDoctorID(dname);
       admission_id++;
 
-      String id = Integer.toString(admission_id);
+      // String id = Integer.toString(admission_id);
       String sql = "INSERT INTO admission_records(admission_record_id, date_admitted, date_discharged, diagnosis, patient_id,  doctor_name, room_number, patient_lastname, discharged) VALUES(?,?,?,?,?,?,?,?,?);";
       try (Connection conn = this.connect();) {
          PreparedStatement ps = conn.prepareStatement(sql);
-         ps.setString(1, id);
+         ps.setInt(1, admission_id);
          ps.setString(2, date_start);
          ps.setString(3, date_end);
          ps.setString(4, diagnosis);
@@ -593,10 +567,10 @@ public class Connect {
          ps.setString(6, dname);
          ps.setString(7, room);
          ps.setString(8, pname);
-         if (!date_end.isEmpty()) {
+         if (date_end != null) {
             ps.setString(9, "TRUE");
          } else {
-            ps.setString(8, "FALSE");
+            ps.setString(9, "FALSE");
          }
          ps.executeUpdate();
          ps.close();
@@ -608,6 +582,7 @@ public class Connect {
       PrintEnd("END ADD ADMISSION RECORD");
    }
 
+   
    public void ListAdmissions() {
       PrintStart("LIST ADMIN RECORDS");
       String sql = "SELECT * FROM admission_records;";
@@ -798,15 +773,6 @@ public class Connect {
       PrintEnd("END Query_1_3");
    }
 
-   //*** Room Helper 
-   private String[] RoomArrayHelper() {
-      String[] rooms = new String[20];
-      for (int i = 1; i < rooms.length; i++) {
-         rooms[i] = Integer.toString(i);
-      }
-      return rooms;
-   }
-
    //*** 2.1) List all patients in the database, with full personal information.
    public void Query_2_1() {
       PrintStart("Query_2_1");
@@ -860,44 +826,58 @@ public class Connect {
    //*** 2.5) For a given patient, list all admissions to the hospital along with 
    //*** the diagnosis for each admission.
    public void Query_2_5() {
-         String last_name = Helper_2_5();
-         PrintStart("Query_2_5");
-         String sql = "SELECT * FROM admission_records WHERE patient_lastname like '" + last_name + "';";
-         System.out.println("\nAddmission Records for: " + last_name);
-         try (Connection conn = this.connect();
-               Statement stmt = conn.createStatement();
-               ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-               System.out.println(
-                  "\nAdmission number:" + rs.getString("admission_record_id") 
-                  + "\nDate admitted: " + rs.getString("date_admitted") 
-                  + "\nDate discharged: "  + rs.getString("date_discharged")
-                  + "\nDiagnosis: "   +rs.getString("diagnosis"));
-            }
-         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+      String last_name = PatientPicker();
+      PrintStart("Query_2_5");
+      String sql = "SELECT * FROM admission_records WHERE patient_lastname like '" + last_name + "';";
+      System.out.println("\nAddmission Records for: " + last_name);
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("\nAdmission number:" + rs.getString("admission_record_id") + "\nDate admitted: "
+                  + rs.getString("date_admitted") + "\nDate discharged: " + rs.getString("date_discharged")
+                  + "\nDiagnosis: " + rs.getString("diagnosis"));
          }
-         PrintEnd("END Query_2_5");
-   }
-
-   //? Helper for 2.5 to get user input to search patient records.
-   private static String Helper_2_5(){
-      System.out.println("Enter the patients last name: ");
-      Scanner input = new Scanner(System.in);
-      String data = input.nextLine();
-      return data;
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_2_5");
    }
 
    //*** 2.6) For a given patient, list all treatments that were administered. 
    //*** Group treatments by admissions. List admissions in descending chronological order, 
    //*** and list treatments in ascending chronological order within each admission.
    public void Query_2_6() {
+
    }
 
    //*** 2.7) List patients who were admitted to the hospital within 30 days of their 
    //*** last discharge date. For each patient list their patient identification number, 
    //*** name, diagnosis, and admitting doctor.
    public void Query_2_7() {
+      // String last_name = PatientPicker();
+      // PrintStart("Query_2_7");
+      // String sql = "SELECT patient.person_id, patient.first_name, patient.last_name, admission_records.diagnosis, "
+      // + "admission_records.date_admitted, admission_records_id, admission_records.date_discharged, admission_records.doctor_name"
+      // + " FROM admission_records INNER JOIN patient ON patient.last_name = admission_records.patient_lastname "
+      // + "WHERE admission_records.date_discharged='Not Discharged';";
+      // System.out.println("\nAddmission Records for: " + last_name);
+      // try (Connection conn = this.connect();
+      //       Statement stmt = conn.createStatement();
+      //       ResultSet rs = stmt.executeQuery(sql)) {
+      //    while (rs.next()) {
+
+      //       // if(StringToDate(rs.getString("date_admitted"),rs.getString("date_discharged"))
+      //       System.out.println(
+      //          "\nAdmission number:" + rs.getString("admission_record_id") 
+      //          + "\nDate admitted: " + rs.getString("date_admitted") 
+      //          + "\nDate discharged: "  + rs.getString("date_discharged")
+      //          + "\nDiagnosis: "   +rs.getString("diagnosis"));
+      //    }
+      // } catch (SQLException e) {
+      //    System.out.println(e.getMessage());
+      // }
+      // PrintEnd("END Query_2_5");
    }
 
    //*** 2.8) For each patient that has ever been admitted to the hospital, list their 
@@ -942,6 +922,23 @@ public class Connect {
    //*** 3.7) List the most recent procedure administered at the hospital. Also, list all doctors that 
    //*** performed that procedure.
    public void Query_3_7() {
+      PrintStart("Query_3_7");
+      //String rooms = "SELECT room_id, patient_lastname FROM room;";
+      String admit = "SELECT room.room_id, room.occupied, admission_records.patient_lastname, admission_records.date_admitted"
+            + " FROM admission_records INNER JOIN room ON room.patient_lastname = admission_records.patient_lastname";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(admit)) {
+         while (rs.next()) {
+            System.out.println("\nPatient: " + rs.getString("patient_lastname") + "\nDate admitted: "
+                  + rs.getString("date_admitted") + "\nRoom number: " + rs.getString("room_id"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_1_1");
+
+
    }
 
    //*** 3.8) List the diagnoses associated with the top 5 patients who have the highest occurrences of 
@@ -973,8 +970,117 @@ public class Connect {
    public void Query_4_5() {
    }
 
+   //! ====================================================================
+   //? ********************************************************************
+   //? ###################### HELPER METHODS FOR QUERIES ###################
+   //? ********************************************************************
+   //! ====================================================================
+
+   //*** Room Helper 
+   private String[] RoomArrayHelper() {
+      String[] rooms = new String[20];
+      for (int i = 1; i < rooms.length; i++) {
+         rooms[i] = Integer.toString(i);
+      }
+      return rooms;
+   }
+
+   //***  Helper to get user input to search patient records.
+   private static String PatientPicker() {
+      System.out.println("\n********************************\n" + "Enter the patients last name: "
+            + "\n*******************************\n");
+
+      Scanner input = new Scanner(System.in);
+      String data = input.nextLine();
+      return data;
+   }
+
+   //***  Helper to compare dates.
+   private static void StringToDate(String start_date, String end_date) {
+      // SimpleDateFormat converts the string format to date object 
+      SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+      try {
+         Date d1 = sdf.parse(start_date);
+         Date d2 = sdf.parse(end_date);
+         // Calucalte time difference 
+         // in milliseconds 
+         long difference_In_Time = d2.getTime() - d1.getTime();
+         long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
+
+         System.out.print("Difference " + "between two dates is: ");
+
+         System.out.println(difference_In_Days + " days, ");
+      }
+      // Catch the Exception 
+      catch (ParseException e) {
+         e.printStackTrace();
+      }
+   }
+
+   //***  Helper to caclulate if date is over 30 days.
+   private static boolean Under30Days(String start_date, String end_date) {
+      // SimpleDateFormat converts the string format to date object 
+      SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+      boolean under30 = false;
+      try {
+         Date d1 = sdf.parse(start_date);
+         Date d2 = sdf.parse(end_date);
+         // Calucalte time difference 
+         // in milliseconds 
+         long difference_In_Time = d2.getTime() - d1.getTime();
+         long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
+         if (difference_In_Days <= 30) {
+            under30 = true;
+            System.out.println(difference_In_Days + " days.");
+         }
+      }
+      // Catch the Exception 
+      catch (ParseException e) {
+         e.printStackTrace();
+      }
+      return under30;
+   }
+
+   //***  Helper to get the last admission day.
+   public void MaxAdmissionID(String last_name) {
+      PrintStart("GET MaxAdmissionID");
+      String sql = "SELECT MAX(admission_record_id) FROM admission_records WHERE patient_lastname LIKE  '" + last_name + "';";
+      System.out.println("\nAddmission Records for: " + last_name);
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("\nAdmission number: " + rs.getInt(1));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Get MaxAdmissionID");
+   }
+
+    //***  Helper to get the last procedure.
+    public void LastProcedure() {
+      PrintStart("GET Last Procedure");
+      String sql = "SELECT MAX(treatment_id) FROM treatments WHERE procedure_type LIKE 'P';";
+      // System.out.println("\nLast procedure: " + last_name);
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("\nTreatment type: " + rs.getInt(1));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Get Last Procedure");
+   }
+
    public static void main(String[] args) throws FileNotFoundException {
-      // Connect app = new Connect();
+      //StringToDate("07-01-2020", "07-31-2020");
+      //MaxAdmissionID();
+      Connect app = new Connect();
+      app.LastProcedure();
+      // app.MaxAdmissionID("Bush");
       // app.DropAllTables();
       // // app.insertPerson("123", "Michael", "Auburn");
       // // System.out.println("After Insert");

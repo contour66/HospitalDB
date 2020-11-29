@@ -47,17 +47,15 @@ public class DataImporter {
       
       // Scans line to check if data is treatment or patient 
       // info by counting words and stores in numcheck.
-      
+   
       while (scanLineCheck.hasNext()) {
          checkWord = scanLineCheck.next();
          checkWord = checkWord.trim();
          numCheck++;
          // System.out.println("Word count " + numCheck + ": " + checkWord);
       }
-      scanLineCheck.close();
-      
-      // Scans each line in data document.
-      
+      scanLineCheck.close();     
+      // Scans each line in data document.  
       while (scan.hasNextLine()) {
          String line = scan.nextLine();
          Scanner scanLine = new Scanner(line);
@@ -66,6 +64,7 @@ public class DataImporter {
          pdata = new String[12];
          tdata = new String[5];
          PatientData patient = new PatientData();
+         TreatmentData treatment = new TreatmentData();
          int count = 0;
          
          // Scans each word in line and checks
@@ -93,31 +92,30 @@ public class DataImporter {
          // with "Not Discharged" so patient can be added to room.
          // Populates patient data.
          
-         if (pdata[11] == null) {
-            pdata[11] = "Not Discharged";
+         if (numCheck > 5) {
+            if (pdata[11] == null) {
+               pdata[11] = "Not Discharged";
+            }
             patient = patientInfo(pdata);
             PopulateDB_PatientData(patient);
-            System.out.println(
-               "Patient " + patient.getFirstName() 
-               + " " + patient.getLastName() 
-               + " " + patient.getDiscDate());
-            // for (String s : tdata){
-            // System.out.println("Treatment: " + s);
+            System.out.println(   "Patient " + patient.getFirstName() + " " 
+            + patient.getLastName() + " " + patient.getDiscDate());
          }
-         else{
-            patient = patientInfo(pdata);
-            PopulateDB_PatientData(patient);
-            System.out.println(
-               "Patient " + patient.getFirstName() 
-               + " " + patient.getLastName() 
-               + " " + patient.getDiscDate());         
+        else{
+            treatment = treatmentInfo(tdata);
+            PopulateDB_TreatmentData(treatment);
          }
          scanLine.close();
       }
       scan.close();
-      app.ListPersons();
-      app.ListRooms();
-      app.ListAdmissions();
+      System.out.println(
+         "\n************************"
+       + "\n!!!!!!!!!!!!!!!!!!!\n"
+       + "END POPULATE DB"
+       + "\n************************"
+       + "\n!!!!!!!!!!!!!!!!!!!\n");
+      
+      
      
    }
 
@@ -132,7 +130,6 @@ public class DataImporter {
       }
    }
 
-   
    //********* Method to intially populate DB from scanned data.
    
    private static void PopulateDB_PatientData(PatientData patient) {
@@ -163,6 +160,10 @@ public class DataImporter {
       app.InsertAdmission(patient.getLastName(), patient.getDoctor(),
       patient.getDiagnosis(), patient.getAdmitDate(),
       patient.getDiscDate(), patient.getRoom());
+
+      app.ListPersons();
+      app.ListRooms();
+      app.ListAdmissions();
    }
 
    
@@ -198,6 +199,23 @@ public class DataImporter {
       }
       System.out.println("Title not valid");
       return false;
+   }
+
+   //*************** Method to intially populate DB from scanned data. 
+   private static void PopulateDB_TreatmentData(TreatmentData treatment) {
+      app.InsertTreatment(treatment.getLastName(), treatment.getDoctor(), treatment.getType(), treatment.getTreatment(),
+            treatment.getDate());
+   }
+
+   //*************** Method to create a new TreatmentData object. 
+   private static TreatmentData treatmentInfo(String[] data) {
+      TreatmentData treatment = new TreatmentData();
+      treatment.setLastName(data[0]);
+      treatment.setDoctor(data[1]);
+      treatment.setType(data[2]);
+      treatment.setTreatment(data[3]);
+      treatment.setDate(data[4]);
+      return treatment;
    }
 
    // private RunMenu(){
