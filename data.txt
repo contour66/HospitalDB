@@ -3,6 +3,9 @@ P,Cal, Ripken,6,Gustavo Fring, 444-464-0332,hghf460, Blue Cross, Rudolph, Skin,9
 P,Lorenzo, Thomas,6,Neal Peart, 434-444-4032,49203dj, HealthNet, Ditka, Migrane,9-12-2020
 P,Reggie,Bush,4,Calvin Johnson, 779-762-3290,LKFIO,Blue Cross, Ayola, Migrane,5-9-2020
 P,Hopkins, John, 20,Calvin Johnson, 779-762-3290,LKFIO,Blue Cross, Ayola, Migrane,6-9-2020
-P,Reggie,Bush,4,Calvin Johnson, 779-762-3290,LKFIO,Blue Cross, Ayola, Death,6-9-2020, 8-7-2020
+P,Reggie,Bush,4,Calvin Johnson, 779-762-3290,LKFIO,Blue Cross, Ayola, Death,3-11-2020, 3-13-2020
 P,Bruce, Springsteen,2,Axl Rose, 999-222-5555,r23545, BlueShield, Decker, Lypo,3-19-2019, 3-20-2020
-P,Sam,Jones,1,Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,3-19-2019, 3-21-2020
+P,Sam,Jones,1,Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,3-18-2019, 3-19-2020
+P,Sam,Jones,1,Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
+P,Donny,Edwards,1,Liz Jones,334-555-1234,fhg6tdsdshf5, Tristar, Smith, Flu,3-13-2019, 3-16-2020
+P,Dom,Klein,1,Liz Jones,334-555-1234,fhg6tdsdshf5, Tristar, Smith, Flu,3-30-2020, 4-6-2020

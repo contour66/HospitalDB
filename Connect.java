@@ -14,6 +14,7 @@ import java.util.Set;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.time.LocalDate;
 
 public class Connect {
    private int pid = 0;
@@ -794,11 +795,57 @@ public class Connect {
    //*** 2.3) List all patients who were discharged in a given date range. List only 
    //*** patient identification number and name.
    public void Query_2_3() {
+      PrintStart("Query_2_3");  
+     String[] dates = DatePicker().clone();
+       String sql = "SELECT * FROM admission_records WHERE date_discharged!= 'Not Discharged';";
+       System.out.println("\nPatients discharged between: " + dates[0] + " and " + dates[1]);
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            boolean between = false;
+            try {
+              between = DateCompare(dates[0],dates[1],rs.getString("date_discharged"));
+             }catch(ParseException e){
+                 System.out.println(e);
+             }
+             if(between == true){
+               System.out.println("\nPatient: " + rs.getString("patient_lastname")
+               + " id: " +rs.getString("patient_id"));
+             }
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_2_3");
    }
 
    //*** 2.4) List all patients who have been admitted within a given date range. 
    //*** List only patient identification number and name.
    public void Query_2_4() {
+      PrintStart("Query_2_4");  
+      String[] dates = DatePicker().clone();
+       String sql = "SELECT * FROM admission_records;";
+       System.out.println("\nPatients admitted between: " + dates[0] + " and " + dates[1]);
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            boolean between = false;
+            try {
+              between = DateCompare(dates[0],dates[1],rs.getString("date_admitted"));
+             }catch(ParseException e){
+                 System.out.println(e);
+             }
+             if(between == true){
+               System.out.println("\nPatient: " + rs.getString("patient_lastname")
+               + " id: " +rs.getString("patient_id"));
+             }
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_2_4");
    }
 
    //*** 2.5) For a given patient, list all admissions to the hospital along with 
@@ -1027,6 +1074,21 @@ public class Connect {
    //*** 3.8) List the diagnoses associated with the top 5 patients who have the highest occurrences of 
    //*** admissions to the hospital, in ascending order or correlation.
    public void Query_3_8() {
+      int count = 1;
+      String sql = "SELECT patient_lastname, diagnosis, " 
+      + "COUNT(patient_lastname) AS total FROM admission_records " 
+      + "GROUP BY patient_lastname, diagnosis " 
+      + "ORDER BY total DESC LIMIT 5 ;";
+      System.out.println("\nTop 5 Diagnosis\n");
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println(count++ + ") " + rs.getString("patient_lastname") + " " + rs.getString("diagnosis"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
    }
 
    //*** 4.1) List all workers at the hospital, in ascending last name, first name order. For each worker, 
@@ -1079,6 +1141,42 @@ public class Connect {
       String data = input.nextLine();
       return data;
    }
+   //***  Helper to get user input to search dates.
+   private static String[] DatePicker() {
+      System.out.println("\n********************************\n" + "Enter the start date in the form yyyy-mm-dd: "
+            + "\n*******************************\n");
+      Scanner input = new Scanner(System.in);
+      String data1 = input.nextLine();
+      System.out.println("\n********************************\n" + "Enter the end date in the form yyyy-mm-dd: "
+      + "\n*******************************\n");
+      String data2 = input.nextLine();
+      String[] data = {data1, data2};
+      return data;
+   }
+    //***  Helper to compare dates.
+    public boolean DateCompare(String date_1, String date_2, String date_dis)throws ParseException {
+      SimpleDateFormat sdformat = new SimpleDateFormat("yyyy-MM-dd");
+      boolean between = false;
+      try {
+         Date d1 = sdformat.parse(date_1);
+         Date d2 = sdformat.parse(date_2);
+         Date dd = sdformat.parse(date_dis);
+         //System.out.println("\nDate 1 is: " + sdformat.format(d1));
+         //System.out.println("Date 2 is: " + sdformat.format(d2));
+         //System.out.println("Discharge date is: " + sdformat.format(dd));
+         if(dd.compareTo(d1) > 0 && dd.compareTo(d2) < 0) {
+            //System.out.println("\nDischarge date " + date_dis +  " IS BETWEEN " + date_1 + " and  " + date_2);
+            between = true;
+         }else {
+            //System.out.println("\nDischarge date " + date_dis +  " IS NOT between " + date_1 + " and " + date_2);
+         }
+      }catch(ParseException e){
+         System.out.println(e);
+      }
+      return between;
+    }
+
+  
 
    //***  Helper to compare dates.
    private static void StringToDate(String start_date, String end_date) {
@@ -1172,7 +1270,7 @@ public class Connect {
    //    PrintEnd("END Get Last Procedure");
    // }
 
-   public static void main(String[] args) throws FileNotFoundException {
+   public static void main(String[] args) throws FileNotFoundException, ParseException {
       //StringToDate("07-01-2020", "07-31-2020");
       //MaxAdmissionID();
       Connect app = new Connect();
@@ -1181,9 +1279,19 @@ public class Connect {
       //app.Query_3_1();
       // app.Query_1_1();
       // app.Query_1_2();
+       app.Query_2_3();
       // app.Query_1_3();
       // app.Query_3_6();
-      app.Query_3_7();
+      // app.Query_3_7();
+   //    try {
+   //    app.DateCompare("2020-03-10", "2020-03-20", "2020-03-15");
+   //    app.DateCompare("2020-03-16", "2020-03-20", "2020-03-15");
+   //    app.DateCompare("2020-03-10", "2020-03-20", "2020-3-30");
+      
+   // }catch(ParseException e){
+   //    System.out.println(e);
+   // }
+      //app.Query_3_8();
       //app.LastProcedure();
       // app.MaxAdmissionID("Bush");
       // app.DropAllTables();
