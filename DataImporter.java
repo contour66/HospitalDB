@@ -95,11 +95,12 @@ public class DataImporter {
          if (numCheck > 5) {
             if (pdata[11] == null) {
                pdata[11] = "Not Discharged";
+               System.out.println(   "Patient " + patient.getFirstName() + " " 
+               + patient.getLastName() + " " + patient.getDiscDate());
             }
             patient = patientInfo(pdata);
             PopulateDB_PatientData(patient);
-            System.out.println(   "Patient " + patient.getFirstName() + " " 
-            + patient.getLastName() + " " + patient.getDiscDate());
+           
          }
         else{
             treatment = treatmentInfo(tdata);
@@ -161,9 +162,7 @@ public class DataImporter {
       patient.getDiagnosis(), patient.getAdmitDate(),
       patient.getDiscDate(), patient.getRoom());
 
-      app.ListPersons();
-      app.ListRooms();
-      app.ListAdmissions();
+      
    }
 
    

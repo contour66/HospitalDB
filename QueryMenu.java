@@ -156,7 +156,10 @@ public class QueryMenu {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-         //ImportData();
+         ImportData();
+        //  app.ListPersons();
+        //  app.ListRooms();
+        //  app.ListAdmissions();
           MenuSelection();
         //DelayTimer();
         //    app.Query_1_3();
