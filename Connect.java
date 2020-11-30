@@ -923,8 +923,6 @@ public class Connect {
       + "GROUP BY diagnosis, patient_lastname "
       + "ORDER BY admission_record_id DESC;";
       try (Connection conn = this.connect();
-      // WHERE date_discharged='Not Discharged' 
-            // Hashtable <String, Integer> diag = new Hashtable<String,Integer>();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
          while (rs.next()) {
@@ -952,6 +950,25 @@ public class Connect {
 
    //*** 3.5) List the top 5 most administered medications.
    public void Query_3_5() {
+      PrintStart("Query_3_5");
+      int count = 1;
+      String sql = "SELECT treatment, "
+      + "COUNT(treatment) AS total FROM treatments "
+      + "WHERE procedure_type= 'M' "
+      + "GROUP BY treatment "
+      + "ORDER BY total DESC LIMIT 5 ;";
+      System.out.println("\nTop 5 Medications\n");
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println(
+           count++ + ") " + rs.getString("treatment"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_3_5");
    }
 
    //*** 3.6) List the most common procedure administered at the hospital. Also, list all doctors that 
@@ -1118,6 +1135,7 @@ public class Connect {
       //MaxAdmissionID();
       Connect app = new Connect();
       //app.Query_3_1();
+      app.Query_3_5();
       //app.LastProcedure();
       // app.MaxAdmissionID("Bush");
       // app.DropAllTables();
