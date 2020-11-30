@@ -918,7 +918,27 @@ public class Connect {
    //*** of each diagnosis.
 
    public void Query_3_2() {
-   }
+      PrintStart("Query_3_2");
+      String sql = "SELECT *, COUNT(*) AS total FROM admission_records " 
+      + "GROUP BY diagnosis, patient_lastname "
+      + "ORDER BY admission_record_id DESC;";
+      try (Connection conn = this.connect();
+      // WHERE date_discharged='Not Discharged' 
+            // Hashtable <String, Integer> diag = new Hashtable<String,Integer>();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println(
+            "\nDiagnosis ID: "+ rs.getInt("admission_record_id")
+           + "\nPatient Last Name: "+ rs.getString("patient_lastname")
+           + "\nDiagnosis: " + rs.getString("diagnosis")
+           + "\nOccurences: " + rs.getInt("total"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_3_2");
+}
 
    //*** 3.3) List the treatments performed at the hospital, in descending order of occurrences. 
    //*** List treatment identification number, name, and total number of occurrences of each treatment.
@@ -957,8 +977,6 @@ public class Connect {
          System.out.println(e.getMessage());
       }
       PrintEnd("END Query_1_1");
-
-
    }
 
    //*** 3.8) List the diagnoses associated with the top 5 patients who have the highest occurrences of 
@@ -1099,19 +1117,19 @@ public class Connect {
       //StringToDate("07-01-2020", "07-31-2020");
       //MaxAdmissionID();
       Connect app = new Connect();
-      app.Query_3_1();
+      //app.Query_3_1();
       //app.LastProcedure();
       // app.MaxAdmissionID("Bush");
       // app.DropAllTables();
-      // // app.insertPerson("123", "Michael", "Auburn");
-      // // System.out.println("After Insert");
-      // // app.selectSample();
+      // app.insertPerson("123", "Michael", "Auburn");
+      // System.out.println("After Insert");
+      // app.selectSample();
       // app.CreateTables();
-      // //app.ListColumns("patient");
+      //app.ListColumns("patient");
       // app.InsertPerson("Don", "Johnson");
       // app.InsertPerson("Moe", "Joe");
       // app.ListPersons();
-      // //app.selectSample();
+      //app.selectSample();
       // app.ListTables();
    }
 }
