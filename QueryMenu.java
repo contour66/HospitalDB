@@ -19,7 +19,7 @@ public class QueryMenu {
 
     public static void PrintMenu() throws FileNotFoundException {
         System.out.println("\n+++++++++++++++++++++++++++++++++++++++++++++++++\n"
-                + "\nEnter a new query selection or type END to end program\n"
+                + "\nEnter a new query selection or type end to stop program\n"
                 + "\n+++++++++++++++++++++++++++++++++++++++++++++++++\n");
         File file = new File("query_selection.txt");
         Scanner scan = new Scanner(file);
@@ -119,19 +119,22 @@ public class QueryMenu {
                     app.Query_4_5();
                     break;
                 case "end":
-                    System.out.println("ENDING PROGRAM");
-                    break;
-                case "n":
-                    System.out.println("ENDING PROGRAM");
                     break;
                 default:
                     System.out.println("Invalid Option. Select Again");
                     break;
             }
-            System.out.println("Select new query?\nEnter y for yes or n for no");
-            query = input.nextLine();
-            if(query.equals("n")){
+            if(query.equals("end")){
                 System.out.println("ENDING PROGRAM");
+            }else{
+                System.out.println("Select new query?\nEnter y for yes or n for no");
+                query = input.nextLine();
+                if(query.equals("n")){
+                    System.out.println("ENDING PROGRAM");
+                }
+                if(!query.equals("y")){
+                    System.out.println("Invalid Entry");
+                }
             }
 
         }
@@ -156,11 +159,13 @@ public class QueryMenu {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-         ImportData();
+        //app.DropAllTables();
+        //ImportData();
         //  app.ListPersons();
         //  app.ListRooms();
         //  app.ListAdmissions();
-          MenuSelection();
+        MenuSelection();
+        //app.DropAllTables();
         //DelayTimer();
         //    app.Query_1_3();
         // MenuSelection("1.2");

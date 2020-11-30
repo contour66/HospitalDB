@@ -13,3 +13,7 @@ Danielson, Smith, M, Fluids, 3-20-2020
 Wonder, Smith, M, Vicodin, 3-20-2020
 Gertrude, Smith, M, Aspirin, 3-20-2020
 Yoko, Smith, M, Focalin, 3-20-2020
+Hans, Solo, P, Set Neck, 3-20-2020
+Jona, Hill, P, Set Brains, 3-20-2020
+Tyreek, Snyder, P, Set Brains, 3-8-2013
+Dicky, Bettis, P, Set Brains, 3-5-2020

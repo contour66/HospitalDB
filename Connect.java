@@ -925,8 +925,11 @@ public class Connect {
    public void Query_3_5() {
       PrintStart("Query_3_5");
       int count = 1;
-      String sql = "SELECT treatment, " + "COUNT(treatment) AS total FROM treatments " + "WHERE procedure_type= 'M' "
-            + "GROUP BY treatment " + "ORDER BY total DESC LIMIT 5 ;";
+      String sql = "SELECT treatment, " 
+      + "COUNT(treatment) AS total FROM treatments " 
+      + "WHERE procedure_type= 'M' "
+      + "GROUP BY treatment " 
+      + "ORDER BY total DESC LIMIT 5 ;";
       System.out.println("\nTop 5 Medications\n");
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
@@ -943,6 +946,41 @@ public class Connect {
    //*** 3.6) List the most common procedure administered at the hospital. Also, list all doctors that 
    //*** performed that procedure.
    public void Query_3_6() {
+      String p = TopProcedure();
+      PrintStart("Query_3_6");
+      System.out.println("\nTop Procedure Performed: " + p + "\n");
+      String sql = "SELECT doctor_name FROM treatments WHERE treatment LIKE " + "'" + p + "';";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println(
+               "\nDoctor: " + rs.getString("doctor_name"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_3_6");
+   }
+   //*** Helper for 3.6
+   public String TopProcedure() {
+      String sql = "SELECT treatment, doctor_name, " 
+      + "COUNT(treatment) AS total FROM treatments " 
+      + "WHERE procedure_type= 'P' "
+      + "GROUP BY doctor_name, treatment "
+      + "ORDER BY total DESC LIMIT 1;";
+      String p = "";
+      System.out.println("\nTop Treatment\n");
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            p = rs.getString("treatment");
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      return p;
    }
 
    //*** 3.7) List the most recent procedure administered at the hospital. Also, list all doctors that 
@@ -962,7 +1000,7 @@ public class Connect {
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
-      PrintEnd("END Query_1_1");
+      PrintEnd("END Query_3_7");
    }
 
    //*** 3.8) List the diagnoses associated with the top 5 patients who have the highest occurrences of 
@@ -1111,7 +1149,7 @@ public class Connect {
       app.Query_1_1();
       app.Query_1_2();
       app.Query_1_3();
-      app.Query_3_5();
+      app.Query_3_6();
       //app.LastProcedure();
       // app.MaxAdmissionID("Bush");
       // app.DropAllTables();

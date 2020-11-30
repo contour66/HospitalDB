@@ -9,3 +9,4 @@ DROP TABLE technician;
 DROP TABLE treatments;
 DROP TABLE volunteer; 
 DROP TABLE room;
+DROP TABLE person;
