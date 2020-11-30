@@ -1,7 +1,6 @@
 Aloya, Smith, M, Vicodin, 1-1-2019
 Jackson, Smith, M, Vicodin, 1-3-2019
 Jones, Smith, P, Set Arm, 3-20-2020
-Winston, James, P, Set Arm, 3-20-2020
 Miller, Patrick, M, Aspirin, 1-1-2019
 Jenkins, Smith, M, Aspirin, 1-3-2019
 Roland, Smith, M, Aspirin, 3-20-2020
@@ -17,3 +16,4 @@ Hans, Solo, P, Set Neck, 3-20-2020
 Jona, Hill, P, Set Brains, 3-20-2020
 Tyreek, Snyder, P, Set Brains, 3-8-2013
 Dicky, Bettis, P, Set Brains, 3-5-2020
+Winston, James, P, Set Arm, 3-20-2020

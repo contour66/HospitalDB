@@ -28,10 +28,10 @@ public class DataImporter {
       System.out.println("Program Intialized");
       app.DropAllTables();
       app.CreateTables();
-      
+      int end = 0;
       // Create new Scanner objects to scan data from
       // document,lines,words.
-      
+   while(end != 2){   
       System.out.println("Enter a filename to scan");
       Scanner input = new Scanner(System.in);
       String data = input.nextLine();
@@ -98,6 +98,12 @@ public class DataImporter {
                System.out.println(   "Patient " + patient.getFirstName() + " " 
                + patient.getLastName() + " " + patient.getDiscDate());
             }
+            else {
+               String convert =  pdata[11];
+               pdata[11] = app.ConverDateHelper(convert);
+            }
+            String convert =  pdata[10];
+            pdata[10] = app.ConverDateHelper(convert);
             patient = patientInfo(pdata);
             PopulateDB_PatientData(patient);
            
@@ -115,9 +121,9 @@ public class DataImporter {
        + "END POPULATE DB"
        + "\n************************"
        + "\n!!!!!!!!!!!!!!!!!!!\n");
+       end++;
+      }    
       
-      
-     
    }
 
    
@@ -164,6 +170,14 @@ public class DataImporter {
 
       
    }
+
+   //*** ConvertDate
+   // public String ConverDateHelper(String date){
+   //    String dates[] = date.split("-");
+   //    String newDate = dates[2] +  "-" + dates[0] + "-" + dates[1];
+   //    System.out.println(newDate);
+   //    return newDate;
+   // }
 
    
    //********* Method to create a new PatientData object.

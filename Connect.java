@@ -946,8 +946,8 @@ public class Connect {
    //*** 3.6) List the most common procedure administered at the hospital. Also, list all doctors that 
    //*** performed that procedure.
    public void Query_3_6() {
-      String p = TopProcedure();
       PrintStart("Query_3_6");
+      String p = TopProcedure();
       System.out.println("\nTop Procedure Performed: " + p + "\n");
       String sql = "SELECT doctor_name FROM treatments WHERE treatment LIKE " + "'" + p + "';";
       try (Connection conn = this.connect();
@@ -963,7 +963,7 @@ public class Connect {
       PrintEnd("END Query_3_6");
    }
    //*** Helper for 3.6
-   public String TopProcedure() {
+   private  String TopProcedure() {
       String sql = "SELECT treatment, doctor_name, " 
       + "COUNT(treatment) AS total FROM treatments " 
       + "WHERE procedure_type= 'P' "
@@ -987,20 +987,41 @@ public class Connect {
    //*** performed that procedure.
    public void Query_3_7() {
       PrintStart("Query_3_7");
-      //String rooms = "SELECT room_id, patient_lastname FROM room;";
-      String admit = "SELECT room.room_id, room.occupied, admission_records.patient_lastname, admission_records.date_admitted"
-            + " FROM admission_records INNER JOIN room ON room.patient_lastname = admission_records.patient_lastname";
+      String p = LastProcedure();
+      System.out.println("\nMost Recent Procedure Performed: " + p + "\n");
+      String sql = "SELECT doctor_name "
+      + "FROM treatments "
+      + "WHERE treatment LIKE  '" + p + "';";
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(admit)) {
+            ResultSet rs = stmt.executeQuery(sql)) {
          while (rs.next()) {
-            System.out.println("\nPatient: " + rs.getString("patient_lastname") + "\nDate admitted: "
-                  + rs.getString("date_admitted") + "\nRoom number: " + rs.getString("room_id"));
+            System.out.println(
+               "\nDoctor: " + rs.getString("doctor_name"));
          }
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
       PrintEnd("END Query_3_7");
+   }
+
+   //*** Helper for 3.7 to get last procedure
+   private  String LastProcedure() {
+      String sql = "SELECT * FROM treatments "
+      + "WHERE procedure_type= 'P' "
+      + "ORDER BY treatment_id "
+      + "DESC LIMIT 1;";
+      String p = "";
+      try (Connection conn = this.connect();
+         Statement stmt = conn.createStatement();
+         ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            p = rs.getString("treatment");
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      return p;
    }
 
    //*** 3.8) List the diagnoses associated with the top 5 patients who have the highest occurrences of 
@@ -1122,34 +1143,47 @@ public class Connect {
       }
       PrintEnd("END Get MaxAdmissionID");
    }
+   //*** DateHelper
+   public void DateHelper(String date){
+      
+   }
+   //*** ConvertDate
+   public String ConverDateHelper(String date){
+      String dates[] = date.split("-");
+      String newDate = dates[2] +  "-" + dates[0] + "-" + dates[1];
+      System.out.println(newDate);
+      return newDate;
+   }
 
    //***  Helper to get the last procedure.
-   public void LastProcedure() {
-      PrintStart("GET Last Procedure");
-      String sql = "SELECT MAX(treatment_id) FROM treatments WHERE procedure_type LIKE 'P';";
-      // System.out.println("\nLast procedure: " + last_name);
-      try (Connection conn = this.connect();
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(sql)) {
-         while (rs.next()) {
-            System.out.println("\nTreatment type: " + rs.getInt(1));
-         }
-      } catch (SQLException e) {
-         System.out.println(e.getMessage());
-      }
-      PrintEnd("END Get Last Procedure");
-   }
+   // public  void LastrProcedure() {
+   //    PrintStart("GET Last Procedure");
+   //    String sql = "SELECT MAX(treatment_id) FROM treatments WHERE procedure_type LIKE 'P';";
+   //    // System.out.println("\nLast procedure: " + last_name);
+   //    try (Connection conn = this.connect();
+   //          Statement stmt = conn.createStatement();
+   //          ResultSet rs = stmt.executeQuery(sql)) {
+   //       while (rs.next()) {
+   //          System.out.println("\nTreatment type: " + rs.getInt(1));
+   //       }
+   //    } catch (SQLException e) {
+   //       System.out.println(e.getMessage());
+   //    }
+   //    PrintEnd("END Get Last Procedure");
+   // }
 
    public static void main(String[] args) throws FileNotFoundException {
       //StringToDate("07-01-2020", "07-31-2020");
       //MaxAdmissionID();
       Connect app = new Connect();
+      ///ConverDateHelper("03-12-2020");
       //RoomArrayHelper();
       //app.Query_3_1();
-      app.Query_1_1();
-      app.Query_1_2();
-      app.Query_1_3();
-      app.Query_3_6();
+      // app.Query_1_1();
+      // app.Query_1_2();
+      // app.Query_1_3();
+      // app.Query_3_6();
+      app.Query_3_7();
       //app.LastProcedure();
       // app.MaxAdmissionID("Bush");
       // app.DropAllTables();
