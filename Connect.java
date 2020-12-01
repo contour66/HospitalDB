@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -13,8 +14,13 @@ import java.sql.ResultSetMetaData;
 import java.util.Set;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.time.LocalDate;
+import java.util.concurrent.TimeUnit;
 
 public class Connect {
    private int pid = 0;
@@ -298,6 +304,23 @@ public class Connect {
       }
       PrintEnd("END PATIENTS LIST");
    }
+
+   public int PatientCount(){
+      String sql = "SELECT COUNT(*) as total from patient;";
+      int count = 0;
+         try (Connection conn = this.connect();
+               Statement stmt = conn.createStatement();
+               ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+              count = rs.getInt("total");
+               System.out.println("\nNumber of patients: "  + rs.getInt("total") );
+            }
+         } catch (SQLException e) {
+            System.out.println(e.getMessage());
+         }
+         return count;
+   }
+
 
    // ******************** POPULATE EMERGENCY CONTACT QUERIES **********************
 
@@ -776,7 +799,7 @@ public class Connect {
       PrintStart("Query_2_2");
       // String sql = "SELECT * FROM admission_records WHERE date_discharged='Not Discharged';";
       String sql = "SELECT patient.person_id, patient.first_name, patient.last_name, admission_records.date_discharged"
-            + " FROM admission_records INNER JOIN patient ON patient.last_name = admission_records.patient_lastname WHERE admission_records.date_discharged='Not Discharged';";
+            + " FROM admission_records INNER JOIN patient ON patient.last_name = admission_records.patient_lastname WHERE admission_records.date_discharged='Not Discharged' GROUP BY person_id, patient_lastname;";
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
@@ -797,7 +820,10 @@ public class Connect {
    public void Query_2_3() {
       PrintStart("Query_2_3");  
      String[] dates = DatePicker().clone();
-       String sql = "SELECT * FROM admission_records WHERE date_discharged!= 'Not Discharged';";
+       String sql = "SELECT patient_lastname, patient_id, date_discharged " 
+       + "FROM admission_records "
+       + "WHERE date_discharged!= 'Not Discharged' "
+       + "GROUP BY patient_lastname, patient_id;";
        System.out.println("\nPatients discharged between: " + dates[0] + " and " + dates[1]);
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
@@ -880,30 +906,77 @@ public class Connect {
    //*** last discharge date. For each patient list their patient identification number, 
    //*** name, diagnosis, and admitting doctor.
    public void Query_2_7() {
-      // String last_name = PatientPicker();
-      // PrintStart("Query_2_7");
-      // String sql = "SELECT patient.person_id, patient.first_name, patient.last_name, admission_records.diagnosis, "
-      // + "admission_records.date_admitted, admission_records_id, admission_records.date_discharged, admission_records.doctor_name"
-      // + " FROM admission_records INNER JOIN patient ON patient.last_name = admission_records.patient_lastname "
-      // + "WHERE admission_records.date_discharged='Not Discharged';";
-      // System.out.println("\nAddmission Records for: " + last_name);
-      // try (Connection conn = this.connect();
-      //       Statement stmt = conn.createStatement();
-      //       ResultSet rs = stmt.executeQuery(sql)) {
-      //    while (rs.next()) {
 
-      //       // if(StringToDate(rs.getString("date_admitted"),rs.getString("date_discharged"))
-      //       System.out.println(
-      //          "\nAdmission number:" + rs.getString("admission_record_id") 
-      //          + "\nDate admitted: " + rs.getString("date_admitted") 
-      //          + "\nDate discharged: "  + rs.getString("date_discharged")
-      //          + "\nDiagnosis: "   +rs.getString("diagnosis"));
-      //    }
-      // } catch (SQLException e) {
-      //    System.out.println(e.getMessage());
-      // }
-      // PrintEnd("END Query_2_5");
+     
+      // String last_name = PatientPicker();
+      PrintStart("Query_2_7");
+      String sql = "SELECT * FROM, "
+      + "admission_records.date_admitted, admission_records_id, admission_records.date_discharged, admission_records.doctor_name"
+      + " FROM admission_records INNER JOIN patient ON patient.last_name = admission_records.patient_lastname "
+      + "WHERE admission_records.date_discharged='Not Discharged';";
+      // System.out.println("\nAddmission Records for: " + last_name);
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+
+            // if(StringToDate(rs.getString("date_admitted"),rs.getString("date_discharged"))
+            System.out.println(
+               "\nAdmission number:" + rs.getString("admission_record_id") 
+               + "\nDate admitted: " + rs.getString("date_admitted") 
+               + "\nDate discharged: "  + rs.getString("date_discharged")
+               + "\nDiagnosis: "   +rs.getString("diagnosis"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_2_7");
    }
+
+   //*** Helper for 2_7
+    public void Helper_2_7(){
+      // String sql = "SELECT date_discharged, patient_lastname FROM admission_records "
+      // + "WHERE admission_records.date_discharged!='Not Discharged'(SELECT julianday('now') - julianday('date_discharged');) "
+      // + "ORDER BY julianday('now') - julianday(date_discharged)";
+
+      String sql = "SELECT patient_lastname, date_discharged( "
+      + "SELECT julianday('now') - julianday('admission_records.date_discharged') FROM admission_records "
+      + "WHERE admission_records.date_discharged!='Not Discharged' "
+      + "ORDER BY patient_lastname);";
+
+//       String sql1 = " SELECT *,
+//       abs(strftime('%s','2015-06-25 10:00:00') - strftime('%s', t.date_discharged)) as 'ClosestDate'
+//  from Test t
+// order by abs(strftime('%s','2015-06-25 10:00:00') - strftime('%s', PriceDate))
+// limit 1;";
+      String dates = "SELECT patient_lastname, date_discharged "
+      + "julianday(date_discharged) - "
+      + "(SELECT date_discharged "
+      + "FROM admission_records AS T2 "
+      +  "WHERE T2.date_discharged - admission_records.date_discharged > 30 "
+      + " ORDER BY patient_lastname DESC "
+      + "LIMIT 1) FROM admission_records;";
+      Hashtable<String, String> name_dates = new Hashtable<String, String>();
+      String name = "";
+      // System.out.println("\nAddmission Records for: " + last_name);
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            name = rs.getString("patient_lastname");
+            // if(StringToDate(rs.getString("date_admitted"),rs.getString("date_discharged"))
+            System.out.println(
+               "\nPatient name:" + rs.getString("patient_lastname")
+               + "\nDate discharged: "  + rs.getString("date_discharged"));
+               // + "\nDoctor: "   +rs.getString("doctor_name"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+
+      
+
+    } 
 
    //*** 2.8) For each patient that has ever been admitted to the hospital, list their 
    //*** total number of admissions, average duration of each admission, longest 
@@ -1074,6 +1147,7 @@ public class Connect {
    //*** 3.8) List the diagnoses associated with the top 5 patients who have the highest occurrences of 
    //*** admissions to the hospital, in ascending order or correlation.
    public void Query_3_8() {
+      PrintStart("Query_3_8");
       int count = 1;
       String sql = "SELECT patient_lastname, diagnosis, " 
       + "COUNT(patient_lastname) AS total FROM admission_records " 
@@ -1089,6 +1163,7 @@ public class Connect {
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
+      PrintEnd("Query_3_7");
    }
 
    //*** 4.1) List all workers at the hospital, in ascending last name, first name order. For each worker, 
@@ -1112,8 +1187,32 @@ public class Connect {
    }
 
    //*** 4.5) List doctors who have been involved in the treatment of every admitted patient.
-   public void Query_4_5() {
-   }
+   public void Query_4_5() { 
+      PrintStart("Query_4_5");
+      ArrayList<String> docs = new ArrayList<String>();
+      String sql3 = "SELECT patient_lastname, doctor_name, COUNT(*) as total FROM admission_records GROUP BY patient_lastname, doctor_name  ORDER by doctor_name;";
+      System.out.println("\nTREATED ALL PATIENTS\n");
+         try (Connection conn = this.connect();
+               Statement stmt = conn.createStatement();
+               ResultSet rs = stmt.executeQuery(sql3)) {
+            while (rs.next()) {
+               docs.add(rs.getString("doctor_name"));
+               // System.out.println("\nDoctor name: "  + rs.getString("doctor_name") 
+               //  + "\nPatient: " + rs.getString("patient_lastname") + "\nCount: " + rs.getInt("total"));
+            }
+         } catch (SQLException e) {
+            System.out.println(e.getMessage());
+         }
+         int pcount = PatientCount();
+         Set<String> set = new HashSet<String>(docs);
+         for(String s : set){
+            int countA=Collections.frequency(docs, s); 
+             if(countA == pcount){
+               System.out.println("Doctor " + s + " has treated all patients");
+             }  
+         }
+         PrintEnd("Query_3_7");
+      } 
 
    //! ====================================================================
    //? ********************************************************************
@@ -1176,7 +1275,32 @@ public class Connect {
       return between;
     }
 
-  
+    //*** Helper to get max date.
+    public String[] MaxDate(String dates[], String name)throws ParseException {
+      String[] data = new String[2];
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+      try {
+         Date[] arrayOfDates = new Date[dates.length];
+            for (int index = 0; index < dates.length; index++) {
+                arrayOfDates[index] = sdf.parse(dates[index]);
+                System.out.println(arrayOfDates[index]);
+            }
+            Arrays.sort(arrayOfDates);
+               for (int index = 0; index < dates.length; index++) {
+                  dates[index] = sdf.format(arrayOfDates[index]);
+                  System.out.println(dates[index]);
+               }
+      }catch(ParseException e){
+         System.out.println(e);
+      }
+      System.out.println("Most recent discharge date: " + dates[dates.length - 1]);
+      data[0] = dates[dates.length - 1];
+      data[1] = name;
+      return data;
+    }
+
+
+   
 
    //***  Helper to compare dates.
    private static void StringToDate(String start_date, String end_date) {
@@ -1201,20 +1325,28 @@ public class Connect {
    }
 
    //***  Helper to caclulate if date is over 30 days.
-   private static boolean Under30Days(String start_date, String end_date) {
+   public boolean Under30Days(String start_date, String end_date) throws ParseException {
       // SimpleDateFormat converts the string format to date object 
-      SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy");
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
       boolean under30 = false;
       try {
          Date d1 = sdf.parse(start_date);
          Date d2 = sdf.parse(end_date);
          // Calucalte time difference 
          // in milliseconds 
-         long difference_In_Time = d2.getTime() - d1.getTime();
-         long difference_In_Days = (difference_In_Time / (1000 * 60 * 60 * 24)) % 365;
-         if (difference_In_Days <= 30) {
+         long diffInMillies = Math.abs(d2.getTime() - d1.getTime());
+         long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+         // if (difference_In_Days <= 30) {
+         //    under30 = true;
+         //    System.out.println(difference_In_Days + "under 30 days.");
+         // }
+         // System.out.println(difference_In_Days + "over 30 days.");
+         if(diff <= 30){
+            System.out.println(diff + " days. Less than 30");
             under30 = true;
-            System.out.println(difference_In_Days + " days.");
+         }
+         else{
+            System.out.println(diff + " days. More than 30");
          }
       }
       // Catch the Exception 
@@ -1279,14 +1411,17 @@ public class Connect {
       //app.Query_3_1();
       // app.Query_1_1();
       // app.Query_1_2();
-       app.Query_2_3();
+      //  app.Query_2_3();
+      // app.Helper_2_7();
+         app.Query_4_5();
       // app.Query_1_3();
       // app.Query_3_6();
-      // app.Query_3_7();
-   //    try {
-   //    app.DateCompare("2020-03-10", "2020-03-20", "2020-03-15");
-   //    app.DateCompare("2020-03-16", "2020-03-20", "2020-03-15");
-   //    app.DateCompare("2020-03-10", "2020-03-20", "2020-3-30");
+      //  app.Query_3_7();
+      String[] dates = {"2020-03-10", "2020-03-20", "2020-03-01", "2020-04-20"};
+      // try {
+      // app.MaxDate(dates);
+      // app.Under30Days("2020-03-16", "2020-03-20");
+      // app.Under30Days("2020-03-01", "2020-04-20");
       
    // }catch(ParseException e){
    //    System.out.println(e);
@@ -1307,74 +1442,3 @@ public class Connect {
       // app.ListTables();
    }
 }
-
-// public void ListAdmissions() {
-// PrintStart("LIST ADMIN RECORDS");
-// String sql = "SELECT * FROM admission_records;";
-// try (Connection conn = this.connect();
-// Statement stmt = conn.createStatement();
-// ResultSet rs = stmt.executeQuery(sql)) {
-// //pdata = PersonInfoByID(rs.getString("person_id"));
-// while (rs.next()) {
-// System.out.println(
-// "\n Record number: " + rs.getString("admission_record_id")
-// + "\n Admit date: " + rs.getString("date_admitted")
-// + "\n Discharge date: " + rs.getString("date_discharged")
-// + "\n Diagnosis: " + rs.getString("diagnosis")
-// + "\n Discharged: " + rs.getString("discharged")
-// + "\n Patient id: " + rs.getString("patient_id")
-// + "\n Patient name: " + rs.getString("patient_lastname")
-// + "\n Doctor name: " + rs.getString("doctor_name")
-// + "\n Room number: " + rs.getString("room_number"));
-// }
-// } catch (SQLException e) {
-// System.out.println(e.getMessage());
-// }
-// PrintEnd("END LIST ADMIN RECORDS");
-// }
-
-// public boolean CheckRoom( String room) {
-//    String sql = "SELECT * FROM room WHERE room_id like '" + room + "';";
-//    boolean occupied = false;
-//    PrintStart("CHECK FOR OCCUPIED ROOM");
-//    try (Connection conn = this.connect();
-//          Statement stmt = conn.createStatement();
-//          ResultSet rs = stmt.executeQuery(sql)) {
-//       while (rs.next()) {
-//          System.out.println(rs.getString("room_id") + "\t" + " is occupied?" + rs.getString("occupied"));  
-//          if(rs.getString("occupied") == "true"){
-//             occupied = true;
-//          }     
-//       }
-//    } catch (SQLException e) {
-//       System.out.println(e.getMessage());
-//    }
-//    PrintEnd("END CHECK FOR OCCUPIED ROOM");
-//    return occupied;
-
-// }
-
-// public boolean CheckRooms() {
-//    String sql = "SELECT COUNT(*) AS total FROM room WHERE occupied;";
-//    boolean occupied = false;
-//    int total = 0;
-//    PrintStart("CHECK FOR OCCUPIED ROOM");
-//    try (Connection conn = this.connect();
-//          Statement stmt = conn.createStatement();
-//          ResultSet rs = stmt.executeQuery(sql)) {
-//       while (rs.next()) {
-//          System.out.println(rs.getInt("total") + " rooms are occupied");  
-//         total = rs.getInt("total");
-//       }
-//    } catch (SQLException e) {
-//       System.out.println(e.getMessage());
-//    }
-//    if(total == 20){
-//       occupied = true;
-//       System.out.println("All rooms occupied");
-//       return occupied;
-//    }
-//    PrintEnd("END CHECK FOR OCCUPIED ROOM");
-//    return occupied;
-
-// }
