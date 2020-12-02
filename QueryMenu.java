@@ -161,12 +161,12 @@ public class QueryMenu {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        //app.DropAllTables();
-      ImportData();
+        app.DropAllTables();
+       ImportData();
         //  app.ListPersons();
         //  app.ListRooms();
         //  app.ListAdmissions();
-        //MenuSelection();
+        MenuSelection();
         //app.DropAllTables();
         //DelayTimer();
         //    app.Query_1_3();

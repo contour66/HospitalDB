@@ -1,2 +1,17 @@
+P,Cal, Ripken,6,Gustavo Fring, 444-464-0332,hghf460, Blue Cross, Rudolph, Skin,8-5-2020
+P,Cal, Ripken,6,Gustavo Fring, 444-464-0332,hghf460, Blue Cross, Rudolph, Skin,9-5-2020
+P,Reggie,Bush,4,Calvin Johnson, 779-762-3290,LKFIO,Blue Cross, Ayola, Migrane,5-9-2020
+P,Hopkins, John, 20,Calvin Johnson, 779-762-3290,LKFIO,Blue Cross, Ayola, Migrane,6-9-2020
+P,Reggie,Bush,4,Calvin Johnson, 779-762-3290,LKFIO,Blue Cross, Ayola, Death,3-11-2020, 3-13-2020
+P,Reggie,Bush,5,Calvin Johnson, 779-762-3290,LKFIO,Blue Cross, Ayola, Death,3-16-2020, 3-17-2020
+P,Bruce, Springsteen,2,Axl Rose, 999-222-5555,r23545, BlueShield, Rudolph, Lypo,3-19-2019, 3-20-2020
+P,Sam,Jones,1,Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,3-18-2019, 3-19-2020
+P,Sam,Jones,1,Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
+V, Tyreek, Hill, 19, Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
+D, Grande, Arianna, 19, Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
+N, Smith, Jyalen, 20, Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
 A, Arians, Tomas, 3,  Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
 T, Kevin, Hart, 7, Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
+P, Rudy, Garcia, 9, Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
+P, Collins, Tom, 6, Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020
+P, Chesek, Rod, 20, Liz Jones,334-555-1234,fhg6thf5, Tristar, Smith, Flu,4-19-2019, 4-21-2020

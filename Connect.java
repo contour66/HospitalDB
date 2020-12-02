@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import java.io.File;
@@ -724,35 +725,20 @@ public class Connect {
 
    //*** 1.2) List the rooms that are currently unoccupied.
    public void Query_1_2() {
-
-      Integer[] roomsearch = RoomArrayHelper().clone();
-
-      String sql = "SELECT *, COUNT(*) AS total FROM room WHERE occupied like 'TRUE' ;";
+      ArrayList<Integer> rooms = new ArrayList<Integer>();
+      String sql = "SELECT * FROM room WHERE occupied='TRUE';";
       PrintStart("LIST UNOCCUPIED ROOM");
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
          while (rs.next()) {
-            System.out.println("Room nums: " + rs.getInt("total") + " is true.");
-            //int num = rs.getInt("room_id");
-            // if(rs.getString("occupied") ==  "TRUE"){
-            //    System.out.println("Room num: " + num + " is true.");
-            //    for(Integer v : roomsearch){
-            //       if(num == v){
-            //          roomsearch[v] = 0;    
-            //          System.out.println("Room search num: " + roomsearch[v]); 
-            //       } 
-            //    }
-            // }
+            rooms.add(rs.getInt("room_id"));
+            //System.out.println("Room nums: " + rs.getInt("total") + " is true.");
          }
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
-      // for(int i = 0; i < roomsearch.length - 1; i ++){
-      //    if (roomsearch[i] != 0){
-      //       System.out.println("Room number: " + roomsearch[i] + " is empty.");
-      //    }
-      // }
+      RoomArrayHelper(rooms);
       PrintEnd("END LIST UNOCCUPIED");
    }
 
@@ -1035,11 +1021,31 @@ public class Connect {
    //*** 3.3) List the treatments performed at the hospital, in descending order of occurrences. 
    //*** List treatment identification number, name, and total number of occurrences of each treatment.
    public void Query_3_3() {
+      PrintStart("Query_3_3");
+      String sql = "SELECT treatment, treatment_id, " 
+      + "COUNT(treatment) AS total FROM treatments " 
+      + "GROUP BY treatment "
+      + "ORDER BY total DESC;";
+      // + "GROUP BY treatment, total "
+      // + "ORDER BY total DESC;";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+      
+         while (rs.next()) {
+            System.out.println("\nTotal: " + rs.getInt("total") + "\nTreatment ID: " + rs.getInt("treatment_id") + "\nTreatment: "
+                  + rs.getString("treatment"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_3_3");
    }
 
    //*** 3.4) List the treatments performed on admitted patients, in descending order of occurrences. 
    //*** List treatment identification number, name, and total number of occurrences of each treatment.
    public void Query_3_4() {
+      Query_3_3();
    }
 
    //*** 3.5) List the top 5 most administered medications.
@@ -1181,6 +1187,7 @@ public class Connect {
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
+      ListDoctors();
       PrintEnd("Query_4_1");
    }
 
@@ -1207,17 +1214,21 @@ public class Connect {
    //*** 4.3) For a given doctor, list all associated diagnoses in descending order of occurrence. For each
    //*** diagnosis, list the total number of occurrences for the given doctor.
    public void Query_4_3() {
+      String name = DocPicker();
       PrintStart("Query_4_2");
-      String sql = "SELECT diagnosis, COUNT(diagnosis)as total FROM admission_records "
-      + "GROUP BY diagnosis";
-      System.out.println("\nHigh Admission Doctors\n");
+      String sql = "SELECT diagnosis,  "
+      + "COUNT(diagnosis) AS total " 
+      + "FROM admission_records " 
+      + "WHERE doctor_name LIKE '" + name + "' "
+      + "GROUP BY diagnosis "
+       + "ORDER BY total DESC;";
+      // System.out.println("\nHigh Admission Doctors\n");
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
          while (rs.next()) {
-            System.out.println("Doctor: " + rs.getString("doctor_name")
-            +"Diagnosis: " + rs.getString("doctor_name")
-            +"Doctor: " + rs.getString("doctor_name"));
+            System.out.println("\nTotal: " + rs.getInt("total") + "\nDiagnosis: "
+                  + rs.getString("diagnosis"));
          }
       } catch (SQLException e) {
          System.out.println(e.getMessage());
@@ -1228,6 +1239,24 @@ public class Connect {
    //*** 4.4) For a given doctor, list all treatments that they ordered in descending order of occurrence. 
    //*** For each treatment, list the total number of occurrences for the given doctor.
    public void Query_4_4() {
+      String name = DocPicker();
+      PrintStart("Query_4_4");
+      String sql = "SELECT treatment, " 
+      + "COUNT(treatment) AS total FROM treatments " 
+      + "WHERE doctor_name LIKE '" + name + "' "
+      + "GROUP BY treatment "
+      + "ORDER BY total DESC;";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) { 
+         while (rs.next()) {
+            System.out.println("\nTotal: " + rs.getInt("total") + "\nTreatment: "
+                  + rs.getString("treatment"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("END Query_3_3");
    }
 
    //*** 4.5) List doctors who have been involved in the treatment of every admitted patient.
@@ -1265,25 +1294,34 @@ public class Connect {
    //! ====================================================================
 
    //*** Room Helper 
-   private static Integer[] RoomArrayHelper() {
-      Integer[] rooms = new Integer[20];
-      int count = 0;
-      for (int i = 1; i <= rooms.length; i++) {
-         rooms[count] = i;
-         //System.out.println("Room Helper: " + rooms[count]);
+   private void RoomArrayHelper(ArrayList<Integer> occ) {
+      ArrayList<Integer> rooms = new ArrayList<Integer>();
+      for (int i = 1; i <= 20; i++) {
+         rooms.add(i);
       }
-      return rooms;
+      rooms.removeAll(occ);
+      rooms.forEach(System.out::println);
    }
 
    //***  Helper to get user input to search patient records.
    private static String PatientPicker() {
-      System.out.println("\n********************************\n" + "Enter the patients last name: "
+      System.out.println("\n********************************\n" + "Enter the patient's last name: "
             + "\n*******************************\n");
 
       Scanner input = new Scanner(System.in);
       String data = input.nextLine();
       return data;
    }
+   //***  Helper to get user input to search patient records.
+   private static String DocPicker() {
+      System.out.println("\n********************************\n" + "Enter the doctor's last name: "
+            + "\n*******************************\n");
+      Scanner input = new Scanner(System.in);
+      String data = input.nextLine();
+      return data;
+   }
+
+   
    //***  Helper to get user input to search dates.
    private static String[] DatePicker() {
       System.out.println("\n********************************\n" + "Enter the start date in the form yyyy-mm-dd: "
@@ -1450,15 +1488,23 @@ public class Connect {
       //StringToDate("07-01-2020", "07-31-2020");
       //MaxAdmissionID();
       Connect app = new Connect();
-      app.ConverDateHelper("03-12-2020");
-      //RoomArrayHelper();
+      app.ListAdmissions();
+      app.Query_4_3();
+      // ArrayList<Integer> nums = new ArrayList<Integer>();
+      // nums.add(5);
+      // nums.add(6);
+      // nums.add(7);
+      // nums.add(9);
+      // nums.add(10);
+      // app.ConverDateHelper("03-12-2020");
+      // app.RoomArrayHelper(nums);
       //app.Query_3_1();
       // app.Query_1_1();
-      // app.Query_1_2();
-       app.Query_2_3();
+      //app.Query_1_2();
+      //  app.Query_2_3();
       // app.Helper_2_7();
          // app.Query_4_2();
-          app.ListPersons();
+         //  app.ListPersons();
       // app.Query_1_3();
       // app.Query_3_6();
       //  app.Query_3_7();

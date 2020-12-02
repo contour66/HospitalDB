@@ -167,11 +167,14 @@ public class DataImporter {
          if (patient.getDiscDate().isEmpty() || patient.getDiscDate() == null || patient.getDiscDate() == "") {
             // patient.setDiscDate("empty");
          }
+         
+        
+      }
+      if((patient.getTitle()).equals("P")){
          app.InsertAdmission(patient.getLastName(), patient.getDoctor(),
          patient.getDiagnosis(), patient.getAdmitDate(),
         patient.getDiscDate(),  patient.getRoom());
-        
-      }
+         }
      
 
       
