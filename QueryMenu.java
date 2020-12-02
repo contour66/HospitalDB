@@ -132,7 +132,9 @@ public class QueryMenu {
                 if(query.equals("n")){
                     System.out.println("ENDING PROGRAM");
                 }
-                if(!query.equals("y") || !query.equals("n")){
+                else if(query.equals("y")){
+                    // System.out.println("Printing Menu");
+                }else{
                     System.out.println("Invalid Entry");
                 }
             }
@@ -160,11 +162,11 @@ public class QueryMenu {
 
     public static void main(String[] args) throws FileNotFoundException {
         //app.DropAllTables();
-       //ImportData();
+      ImportData();
         //  app.ListPersons();
         //  app.ListRooms();
         //  app.ListAdmissions();
-        MenuSelection();
+        //MenuSelection();
         //app.DropAllTables();
         //DelayTimer();
         //    app.Query_1_3();

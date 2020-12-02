@@ -157,22 +157,23 @@ public class Connect {
    }
 
    // ******************** POPULATE PERSON QUERIES **********************
-   public void InsertPerson(String first_name, String last_name) {
+   public void InsertPerson(String first_name, String last_name, String title) {
       PrintStart("ADD PERSON");
       pid++;
       // String id = Integer.toString(pid);
-      String sql = "INSERT INTO person(person_id, first_name, last_name) VALUES(?,?,?);";
+      String sql = "INSERT INTO person(person_id, first_name, last_name, title) VALUES(?,?,?,?);";
       try (Connection conn = this.connect();) {
          PreparedStatement ps = conn.prepareStatement(sql);
          ps.setInt(1, pid); // First ? in sql
          ps.setString(2, first_name); // Second ? in sql
          ps.setString(3, last_name); // Fourth ? in sql
+         ps.setString(4, title);
          ps.executeUpdate();
          ps.close();
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
-      System.out.println(first_name + " " + last_name + " ADDED with id: " + pid);
+      System.out.println(title + " " + first_name + " " + last_name + " ADDED with id: " + pid);
       PrintEnd("ADDED PERSON");
    }
 
@@ -250,12 +251,12 @@ public class Connect {
 
    public void ListPersons() {
       PrintStart("LIST PERSONS");
-      String sql = "SELECT person_id, first_name, last_name FROM person;";
+      String sql = "SELECT * FROM person;";
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
          while (rs.next()) {
-            System.out.println("\n" + rs.getString("first_name") + " " + rs.getString("last_name") + " id: "
+            System.out.println("\n" + rs.getString("title") + " " + rs.getString("first_name") + " " + rs.getString("last_name") + " id: "
                   + rs.getString("person_id") + "\t");
          }
       } catch (SQLException e) {
@@ -822,8 +823,8 @@ public class Connect {
      String[] dates = DatePicker().clone();
        String sql = "SELECT patient_lastname, patient_id, date_discharged " 
        + "FROM admission_records "
-       + "WHERE date_discharged!= 'Not Discharged' "
-       + "GROUP BY patient_lastname, patient_id;";
+      + "WHERE date_discharged!= 'Not Discharged' "
+      + "GROUP BY patient_lastname, patient_id;";
        System.out.println("\nPatients discharged between: " + dates[0] + " and " + dates[1]);
       try (Connection conn = this.connect();
             Statement stmt = conn.createStatement();
@@ -1163,22 +1164,65 @@ public class Connect {
       } catch (SQLException e) {
          System.out.println(e.getMessage());
       }
-      PrintEnd("Query_3_7");
+      PrintEnd("Query_3_8");
    }
 
    //*** 4.1) List all workers at the hospital, in ascending last name, first name order. For each worker, 
    //*** list their, name, and job category.
    public void Query_4_1() {
+      PrintStart("Query_4_1");
+      String sql = "SELECT * FROM person;";
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("\n" + rs.getString("title") + " " + rs.getString("first_name") + " " + rs.getString("last_name"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("Query_4_1");
    }
 
    //*** 4.2) List the primary doctors of patients with a high admission rate (at least 4 admissions within 
    //*** a one-year time frame).
    public void Query_4_2() {
+      PrintStart("Query_4_2");
+      String sql = "SELECT doctor_name, COUNT(*) FROM admission_records "
+      + "GROUP BY doctor_name "
+      + "HAVING COUNT(*) >5;";
+      System.out.println("\nHigh Admission Doctors\n");
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("Doctor: " + rs.getString("doctor_name"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("Query_4_2");
    }
 
    //*** 4.3) For a given doctor, list all associated diagnoses in descending order of occurrence. For each
    //*** diagnosis, list the total number of occurrences for the given doctor.
    public void Query_4_3() {
+      PrintStart("Query_4_2");
+      String sql = "SELECT diagnosis, COUNT(diagnosis)as total FROM admission_records "
+      + "GROUP BY diagnosis";
+      System.out.println("\nHigh Admission Doctors\n");
+      try (Connection conn = this.connect();
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql)) {
+         while (rs.next()) {
+            System.out.println("Doctor: " + rs.getString("doctor_name")
+            +"Diagnosis: " + rs.getString("doctor_name")
+            +"Doctor: " + rs.getString("doctor_name"));
+         }
+      } catch (SQLException e) {
+         System.out.println(e.getMessage());
+      }
+      PrintEnd("Query_4_2");
    }
 
    //*** 4.4) For a given doctor, list all treatments that they ordered in descending order of occurrence. 
@@ -1381,7 +1425,7 @@ public class Connect {
    public String ConverDateHelper(String date){
       String dates[] = date.split("-");
       String newDate = dates[2] +  "-" + dates[0] + "-" + dates[1];
-      System.out.println(newDate);
+      System.out.println("New date conversion: " + newDate);
       return newDate;
    }
 
@@ -1406,14 +1450,15 @@ public class Connect {
       //StringToDate("07-01-2020", "07-31-2020");
       //MaxAdmissionID();
       Connect app = new Connect();
-      ///ConverDateHelper("03-12-2020");
+      app.ConverDateHelper("03-12-2020");
       //RoomArrayHelper();
       //app.Query_3_1();
       // app.Query_1_1();
       // app.Query_1_2();
-      //  app.Query_2_3();
+       app.Query_2_3();
       // app.Helper_2_7();
-         app.Query_4_5();
+         // app.Query_4_2();
+          app.ListPersons();
       // app.Query_1_3();
       // app.Query_3_6();
       //  app.Query_3_7();

@@ -19,6 +19,7 @@ public class DataImporter {
    private static String[] pdata;
    private static String[] titles = { "V", "D", "A", "N", "T", "P" };
    private static String[] tdata;
+   private static String[] wdata;
    private static Connect app = new Connect();
 
   // public static void main(String[] args) throws FileNotFoundException {
@@ -63,9 +64,13 @@ public class DataImporter {
          String word = "";
          pdata = new String[12];
          tdata = new String[5];
+         wdata = new String[3];
          PatientData patient = new PatientData();
          TreatmentData treatment = new TreatmentData();
+         WorkerData worker = new WorkerData();
          int count = 0;
+         String[] title = new String[0];
+         //int tcount = "";
          
          // Scans each word in line and checks
          // if it should add to patient data
@@ -93,20 +98,16 @@ public class DataImporter {
          // Populates patient data.
          
          if (numCheck > 5) {
+            pdata[10] = app.ConverDateHelper(pdata[10]);
             if (pdata[11] == null) {
                pdata[11] = "Not Discharged";
-               System.out.println(   "Patient " + patient.getFirstName() + " " 
-               + patient.getLastName() + " " + patient.getDiscDate());
+            }else{
+               pdata[11] = app.ConverDateHelper(pdata[11]);
             }
-            else {
-               String convert =  pdata[11];
-               pdata[11] = app.ConverDateHelper(convert);
-            }
-            String convert =  pdata[10];
-            pdata[10] = app.ConverDateHelper(convert);
             patient = patientInfo(pdata);
             PopulateDB_PatientData(patient);
-           
+            System.out.println(   "Patient " + patient.getFirstName() + " " 
+            + patient.getLastName() + " " + patient.getDiscDate());
          }
         else{
             treatment = treatmentInfo(tdata);
@@ -145,13 +146,17 @@ public class DataImporter {
          app.GetDoctorID(patient.getDoctor());
          // Inserts patient data if letter in data starts with "P".
          if ((patient.getTitle()).equals("P")) {
-            app.InsertPerson(patient.getFirstName(), patient.getLastName());
+            app.InsertPerson(patient.getFirstName(), patient.getLastName(), "Patient");
             app.InsertPatient(patient.getLastName(), patient.getIpName(), patient.getIpNumber());
             app.InsertEContact(patient.getEmContact(), patient.getEmPhone(), patient.getLastName());
             // Inserts patient to room if they have not been discharged.
             if ((patient.getDiscDate()).equals("Not Discharged")) {
                app.InsertRoom(patient.getLastName(), patient.getRoom());
             }
+           
+         }
+         else if(!(patient.getTitle()).equals("P")){
+             app.InsertPerson(patient.getFirstName(), patient.getLastName(), pickTitle(patient.getTitle()));
          }
          // Inserts doctor info.
          if (!app.DoctorExists(patient.getDoctor())) {
@@ -162,13 +167,18 @@ public class DataImporter {
          if (patient.getDiscDate().isEmpty() || patient.getDiscDate() == null || patient.getDiscDate() == "") {
             // patient.setDiscDate("empty");
          }
+         app.InsertAdmission(patient.getLastName(), patient.getDoctor(),
+         patient.getDiagnosis(), patient.getAdmitDate(),
+        patient.getDiscDate(),  patient.getRoom());
         
       }
-      app.InsertAdmission(patient.getLastName(), patient.getDoctor(),
-      patient.getDiagnosis(), patient.getAdmitDate(),
-      patient.getDiscDate(), patient.getRoom());
+     
 
       
+   }
+
+   public void PopulateWorker(WorkerData worker){
+      app.InsertPerson(worker.getFirstName(), worker.getLastName(), worker.getTitle());     
    }
 
    //*** ConvertDate
@@ -227,9 +237,34 @@ public class DataImporter {
       treatment.setDoctor(data[1]);
       treatment.setType(data[2]);
       treatment.setTreatment(data[3]);
-      treatment.setDate(data[4]);
+      treatment.setDate(app.ConverDateHelper(data[4]));
       return treatment;
    }
+
+   private static String pickTitle(String t){
+      String title = "";
+      switch(t){
+         case "D":
+            title = "Doctor";
+         break;
+         case "T":
+            title = "Technician";
+         break;
+         case "N":
+            title = "Nurse";
+         break;
+         case "A":
+            title = "Administrator";
+         break;
+         case "V":
+            title = "Volunteer";
+         break;
+         default:
+            break;
+      }
+      return title;
+   }
+
 
    // private RunMenu(){
    //    Scanner input = new Scanner(System.in);
