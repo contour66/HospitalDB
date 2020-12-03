@@ -1,0 +1,6 @@
+Aloya, Smith, M, Vicodin, 1-1-2019
+Jackson, Smith, M, Vicodin, 1-3-2019
+Jones, Smith, P, Set Arm, 3-20-2019
+Aloya, Smith, M, Vicodin, 1-1-2020
+Jackson, Smith, M, Vicodin, 1-3-2020
+Jones, Smith, P, Set Arm, 3-20-2020

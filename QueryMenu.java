@@ -2,6 +2,7 @@ import java.util.Hashtable;
 import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.ParseException;
 import java.util.concurrent.TimeUnit;
 
 public class QueryMenu {
@@ -74,7 +75,11 @@ public class QueryMenu {
                     app.Query_2_6();
                     break;
                 case "2.7":
+                try{
                     app.Query_2_7();
+                }catch (ParseException e){
+                    System.out.println(e);
+                }
                     break;
                 case "2.8":
                     app.Query_2_8();
@@ -161,7 +166,7 @@ public class QueryMenu {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
-        app.DropAllTables();
+        //app.DropAllTables();
        ImportData();
         //  app.ListPersons();
         //  app.ListRooms();
